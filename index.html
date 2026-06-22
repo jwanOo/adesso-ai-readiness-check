@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Adesso · AI Readiness Check</title>
+  <title>Adesso AI Readiness Check</title>
   <meta name="description" content="Adesso AI Readiness Check — assess your organization's AI maturity." />
 
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" />
@@ -16,122 +16,25 @@
           onerror="this.onerror=null;this.src='https://unpkg.com/@babel/standalone@7.25.6/babel.min.js';"></script>
 
   <style>
-    /* ---- Design system mirroring jwanOo/ai-readiness-check ------------------- */
-    * { box-sizing: border-box; font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif; }
-    html, body, #root { height: 100%; margin: 0; }
-    body { background: #F5F7FA; color: #1B3A5C; line-height: 1.5; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', 'DM Sans', system-ui, -apple-system, sans-serif; }
+    html { min-height: 100%; width: 100%; background-color: #F7F9FC; }
+    body { min-height: 100vh; width: 100%; background-color: #F7F9FC; color: #1B3A5C; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    #root { min-height: 100vh; width: 100%; background-color: #F7F9FC; }
 
-    .app { min-height: 100vh; background: linear-gradient(135deg, #F5F7FA 0%, #E8EDF2 100%); padding: 20px; }
-    .container { max-width: 1100px; margin: 0 auto; background: #fff; border-radius: 24px; box-shadow: 0 20px 60px rgba(27, 58, 92, 0.08); overflow: hidden; }
-
-    .header { background: linear-gradient(135deg, #1B3A5C, #2E5C8A); color: white; padding: 32px 40px; display: flex; justify-content: space-between; align-items: center; }
-    .header-left { display: flex; align-items: center; gap: 14px; }
-    .header-logo {
-      width: 48px; height: 48px; border-radius: 12px;
-      background: linear-gradient(135deg, #ef4444, #b91c1c);
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 26px; color: #fff;
-    }
-    .header-title { font-size: 22px; font-weight: 700; margin: 0; }
-    .header-sub { font-size: 13px; opacity: 0.85; margin-top: 2px; }
-    .header-actions { display: flex; gap: 10px; align-items: center; }
-    .header .btn-ghost {
-      background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(255,255,255,0.25);
-      padding: 8px 14px; border-radius: 10px; font-size: 13px; font-weight: 500; cursor: pointer;
-    }
-    .header .btn-ghost:hover { background: rgba(255,255,255,0.2); }
-
-    .content { padding: 32px 40px; }
-
-    .section-title { font-size: 20px; font-weight: 600; color: #1B3A5C; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #E8EDF2; display: flex; justify-content: space-between; align-items: center; }
-    .section-badge { background: linear-gradient(135deg, #1B3A5C, #2E5C8A); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; }
-
-    .q-block { padding: 16px 0; border-bottom: 1px solid #F0F2F5; }
-    .q-block:last-child { border-bottom: none; }
-    .q-label { font-size: 15px; color: #1B3A5C; font-weight: 500; margin-bottom: 10px; }
-    .q-help { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: #E8EDF2; color: #5D6D7E; font-size: 11px; font-weight: 600; margin-left: 6px; cursor: help; vertical-align: middle; }
-    .q-help:hover { background: #1B3A5C; color: white; }
-
-    .input, .select, textarea { width: 100%; padding: 12px 14px; border: 2px solid #E8EDF2; border-radius: 10px; font-size: 14px; transition: all 0.2s; background: #fff; color: #1B3A5C; }
-    .input:focus, .select:focus, textarea:focus { outline: none; border-color: #2E5C8A; box-shadow: 0 0 0 3px rgba(46, 92, 138, 0.1); }
-    textarea { min-height: 80px; resize: vertical; }
-
-    .button { background: linear-gradient(135deg, #1B3A5C, #2E5C8A); color: white; padding: 14px 28px; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-    .button:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(27, 58, 92, 0.25); }
-    .button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
-    .button-secondary { background: #fff; color: #1B3A5C; border: 2px solid #E8EDF2; }
-    .button-secondary:hover { background: #F7F9FC; border-color: #1B3A5C; transform: none; box-shadow: none; }
-    .button-block { display: block; width: 100%; }
-
-    .score-card { background: linear-gradient(135deg, #1B3A5C, #2E5C8A); color: white; padding: 32px; border-radius: 16px; text-align: center; margin-bottom: 24px; }
-    .score-value { font-size: 64px; font-weight: 800; line-height: 1; margin: 12px 0; }
-    .score-label { font-size: 14px; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px; }
-    .score-sub   { font-size: 14px; opacity: 0.85; margin-top: 8px; }
-
-    .tabs { display: flex; gap: 4px; background: #F7F9FC; padding: 4px; border-radius: 12px; margin-bottom: 24px; flex-wrap: wrap; }
-    .tab { flex: 1; min-width: 110px; padding: 12px 16px; border: none; background: transparent; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; color: #5D6D7E; transition: all 0.2s; }
-    .tab.active { background: white; color: #1B3A5C; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-    .tab.complete::after { content: ' ✓'; color: #27AE60; }
-
-    .alert { padding: 16px 20px; border-radius: 10px; margin-bottom: 16px; display: flex; align-items: start; gap: 12px; font-size: 14px; line-height: 1.5; }
-    .alert.warning { background: #FEF9E7; border-left: 4px solid #F39C12; color: #7D5A00; }
-    .alert.danger  { background: #FDEDEC; border-left: 4px solid #E74C3C; color: #922B21; }
-    .alert.success { background: #EAFAF1; border-left: 4px solid #27AE60; color: #1E8449; }
-    .alert.info    { background: #EBF5FB; border-left: 4px solid #3498DB; color: #1F618D; }
-
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-    @media (max-width: 720px) {
-      .grid-2, .grid-3 { grid-template-columns: 1fr; }
-      .header { padding: 24px; flex-direction: column; gap: 16px; align-items: flex-start; }
-      .content { padding: 24px; }
-    }
-
-    .info-card { background: #F7F9FC; padding: 16px; border-radius: 10px; }
-    .info-card-label { font-size: 12px; color: #7F8C8D; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-    .info-card-value { font-size: 22px; font-weight: 700; color: #1B3A5C; }
-
-    .nav { display: flex; justify-content: space-between; padding-top: 24px; margin-top: 24px; border-top: 2px solid #F0F2F5; gap: 12px; flex-wrap: wrap; }
-
-    .progress-track { background: #E8EDF2; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 24px; }
-    .progress-fill { background: linear-gradient(90deg, #2E5C8A, #1B3A5C); height: 100%; transition: width 0.3s; }
-
-    .recommendation { padding: 14px 18px; border-radius: 10px; margin-bottom: 10px; font-size: 14px; line-height: 1.5; }
-    .recommendation.critical { background: #FDEDEC; border-left: 4px solid #E74C3C; color: #922B21; }
-    .recommendation.warning  { background: #FEF9E7; border-left: 4px solid #F39C12; color: #7D5A00; }
-    .recommendation.success  { background: #EAFAF1; border-left: 4px solid #27AE60; color: #1E8449; }
-    .recommendation strong { display: block; margin-bottom: 4px; font-weight: 700; }
-
-    .pill-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-    .pill { padding: 8px 14px; border: 2px solid #E8EDF2; border-radius: 20px; font-size: 13px; cursor: pointer; transition: all 0.2s; user-select: none; background: #fff; color: #1B3A5C; }
-    .pill:hover { border-color: #2E5C8A; background: #F7F9FC; }
-    .pill.selected { background: linear-gradient(135deg, #1B3A5C, #2E5C8A); color: white; border-color: #1B3A5C; }
-
-    .heat-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
-    @media (max-width: 900px) { .heat-grid { grid-template-columns: repeat(3, 1fr); } }
-    @media (max-width: 480px) { .heat-grid { grid-template-columns: repeat(2, 1fr); } }
-    .heat-cell { aspect-ratio: 1/1; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; color: #fff; text-align: center; }
-    .heat-cell .num { font-size: 28px; font-weight: 800; line-height: 1; }
-    .heat-cell .lab { font-size: 11px; opacity: 0.95; margin-top: 4px; }
-    .heat-name { font-size: 12px; font-weight: 600; color: #1B3A5C; text-align: center; margin-top: 8px; }
-
-    .footer-tagline { text-align: center; padding: 16px; color: #5D6D7E; font-size: 12px; font-style: italic; background: #F7F9FC; }
-
-    /* ---- Loading splash ---- */
     .loading-splash {
       position: fixed; inset: 0;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 16px; background: linear-gradient(135deg, #F5F7FA 0%, #E8EDF2 100%); z-index: 9999;
+      gap: 16px; background: #F7F9FC; z-index: 9999;
     }
     .loading-splash .badge {
-      background: linear-gradient(135deg, #1B3A5C, #2E5C8A);
+      background: linear-gradient(135deg, #1B3A5C, #2E86C1);
       color: #fff; padding: 14px 22px; border-radius: 14px;
-      font-weight: 800; font-size: 22px; box-shadow: 0 10px 30px rgba(27,58,92,0.15);
+      font-weight: 800; font-size: 22px;
     }
     .loading-splash .spinner {
-      width: 26px; height: 26px; border-radius: 50%;
-      border: 3px solid rgba(27,58,92,0.15); border-top-color: #1B3A5C;
-      animation: spin 0.9s linear infinite;
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 3px solid #E8EDF2; border-top-color: #2E86C1;
+      animation: spin 1s linear infinite;
     }
     .loading-splash .sub { font-size: 13px; color: #5D6D7E; }
     .loading-splash .err {
@@ -149,8 +52,7 @@
     <div class="spinner"></div>
     <div class="sub">Loading…</div>
     <div id="splash-err" class="err">
-      Could not load required libraries. If you are on a corporate network, please allow
-      <code>cdn.jsdelivr.net</code> and <code>unpkg.com</code> and refresh.
+      Could not load required libraries. Please allow <code>cdn.jsdelivr.net</code> and <code>unpkg.com</code>, then refresh.
     </div>
   </div>
 
@@ -167,7 +69,7 @@
     const { useState, useEffect } = React;
 
     /* ============================================================
-     *  Auth (client-side)
+     *  Auth (client-side only)
      * ============================================================ */
     const ALLOWED_USERS = [
       { email: 'roman.borvitz@adesso-group.com', password: 'R0man@Adesso2026!', name: 'Roman Borvitz' }
@@ -177,31 +79,26 @@
     /* ============================================================
      *  Storage
      * ============================================================ */
-    const STORAGE_KEYS = {
-      RESPONSES: 'adesso_ai_readiness_responses',
-      PROGRESS:  'adesso_ai_readiness_progress'
-    };
+    const STORAGE_KEYS = { RESPONSES: 'adesso_ai_readiness_responses', PROGRESS: 'adesso_ai_readiness_progress' };
     const storage = {
       getAllResponses() { try { const d = localStorage.getItem(STORAGE_KEYS.RESPONSES); return d ? JSON.parse(d) : []; } catch { return []; } },
-      saveResponse(r)   {
+      saveResponse(r) {
         const list = storage.getAllResponses();
         const item = { ...r, id: Date.now(), date: new Date().toISOString() };
         list.push(item);
         try { localStorage.setItem(STORAGE_KEYS.RESPONSES, JSON.stringify(list)); } catch {}
         return item;
       },
-      saveProgress(p)   { try { localStorage.setItem(STORAGE_KEYS.PROGRESS, JSON.stringify(p)); } catch {} },
-      getProgress()     { try { const d = localStorage.getItem(STORAGE_KEYS.PROGRESS); return d ? JSON.parse(d) : null; } catch { return null; } },
-      clearProgress()   { try { localStorage.removeItem(STORAGE_KEYS.PROGRESS); } catch {} },
+      saveProgress(p) { try { localStorage.setItem(STORAGE_KEYS.PROGRESS, JSON.stringify(p)); } catch {} },
+      getProgress() { try { const d = localStorage.getItem(STORAGE_KEYS.PROGRESS); return d ? JSON.parse(d) : null; } catch { return null; } },
+      clearProgress() { try { localStorage.removeItem(STORAGE_KEYS.PROGRESS); } catch {} },
       exportToCSV(list) {
         const header = 'Date,Company,Contact,Email,Overall Score,Maturity Level,Strategy,Data,Tech,People,Governance,Innovation\n';
         const rows = list.map(r => {
           const s = r.categoryScores.reduce((a, c) => ({ ...a, [c.id]: c.score }), {});
-          return [
-            r.date, '"' + (r.companyName || '') + '"', '"' + (r.contactName || '') + '"',
-            r.email || '', r.overallScore, '"' + (r.maturityLevel || '') + '"',
-            s.strategy || 0, s.data || 0, s.tech || 0, s.people || 0, s.governance || 0, s.innovation || 0
-          ].join(',');
+          return [r.date, '"' + (r.companyName || '') + '"', '"' + (r.contactName || '') + '"',
+                  r.email || '', r.overallScore, '"' + (r.maturityLevel || '') + '"',
+                  s.strategy || 0, s.data || 0, s.tech || 0, s.people || 0, s.governance || 0, s.innovation || 0].join(',');
         }).join('\n');
         const blob = new Blob([header + rows], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
@@ -214,18 +111,18 @@
      *  Data
      * ============================================================ */
     const sections = [
-      { id: 'strategy',   label: 'Strategy',   short: 'Strategy & Vision',     description: 'Strategic alignment of AI initiatives with business objectives' },
-      { id: 'data',       label: 'Data',       short: 'Data Maturity',         description: 'Quality, accessibility, and governance of organizational data' },
-      { id: 'tech',       label: 'Tech',       short: 'Technology Stack',      description: 'Infrastructure and tools supporting AI implementation' },
-      { id: 'people',     label: 'People',     short: 'People & Culture',      description: 'Skills, training, and cultural readiness for AI adoption' },
-      { id: 'governance', label: 'Governance', short: 'Governance & Ethics',   description: 'Ethical frameworks and compliance for AI deployment' },
-      { id: 'innovation', label: 'Innovation', short: 'Innovation Capability', description: 'Capacity for experimentation and technology adoption' }
+      { id: 'strategy',   label: 'Strategy & Vision',     icon: '🎯', description: 'Strategic alignment of AI initiatives with business objectives' },
+      { id: 'data',       label: 'Data Maturity',         icon: '📊', description: 'Quality, accessibility, and governance of organizational data' },
+      { id: 'tech',       label: 'Technology Stack',      icon: '⚙️', description: 'Infrastructure and tools supporting AI implementation' },
+      { id: 'people',     label: 'People & Culture',      icon: '👥', description: 'Skills, training, and cultural readiness for AI adoption' },
+      { id: 'governance', label: 'Governance & Ethics',   icon: '🛡️', description: 'Ethical frameworks and compliance for AI deployment' },
+      { id: 'innovation', label: 'Innovation Capability', icon: '💡', description: 'Capacity for experimentation and technology adoption' }
     ];
 
     const questions = [
-      { id: 1,  category: 'strategy',   text: 'Does your organization have a clearly defined AI strategy aligned with business objectives?', weight: 3, helpText: 'Documented AI roadmap, alignment with business KPIs, executive sponsorship' },
-      { id: 2,  category: 'strategy',   text: 'Is there executive sponsorship and budget allocated for AI initiatives?', weight: 3, helpText: 'Dedicated AI budget, C-level champion, clear ownership' },
-      { id: 3,  category: 'data',       text: 'Do you have a centralized data infrastructure (data lake / warehouse)?', weight: 2, helpText: 'Modern platforms like Snowflake, Databricks, BigQuery, SAP Datasphere, etc.' },
+      { id: 1,  category: 'strategy',   text: 'Does your organization have a clearly defined AI strategy aligned with business objectives?', weight: 3, helpText: 'Look for documented AI roadmap, alignment with business KPIs, and executive sponsorship' },
+      { id: 2,  category: 'strategy',   text: 'Is there executive sponsorship and budget allocated for AI initiatives?', weight: 3, helpText: 'Dedicated AI budget, C-level champion, and clear ownership' },
+      { id: 3,  category: 'data',       text: 'Do you have a centralized data infrastructure (data lake / warehouse)?', weight: 2, helpText: 'Modern data platforms like Snowflake, Databricks, BigQuery, SAP Datasphere, etc.' },
       { id: 4,  category: 'data',       text: 'Is your data quality monitored and governed systematically?', weight: 3, helpText: 'Data quality tools, data governance frameworks, regular audits' },
       { id: 5,  category: 'data',       text: 'Can you access historical data for at least 2 years across key business areas?', weight: 2, helpText: 'Historical data availability for training ML models' },
       { id: 6,  category: 'tech',       text: 'Does your IT infrastructure support cloud computing and scalable processing?', weight: 2, helpText: 'Cloud presence (AWS, Azure, GCP), elastic compute, containerization' },
@@ -263,43 +160,113 @@
       return Math.round(s.reduce((a, b) => a + b, 0) / s.length);
     }
     function maturity(score) {
-      if (score >= 80) return { level: 'AI Pioneer',  desc: 'Leading the way in AI transformation',  detail: 'Your organization demonstrates exceptional AI maturity across all dimensions. You are well-positioned to leverage AI for competitive advantage.', percentile: 'Top 10%' };
-      if (score >= 60) return { level: 'AI Adopter',  desc: 'Actively implementing AI solutions',    detail: 'Solid AI foundations and active implementation. Focus on scaling successful initiatives and closing remaining capability gaps.', percentile: 'Top 25%' };
-      if (score >= 40) return { level: 'AI Explorer', desc: 'Exploring AI opportunities',            detail: 'You have some foundational capabilities. Now is the time to develop a strategic roadmap and build core competencies.', percentile: 'Top 50%' };
-      if (score >= 20) return { level: 'AI Aware',    desc: 'Beginning AI awareness journey',        detail: 'Early stage of AI awareness. Foundational data infrastructure and AI literacy should be priorities.', percentile: 'Bottom 50%' };
-      return                  { level: 'AI Novice',   desc: 'Early stage of AI readiness',           detail: 'Just beginning the AI journey. Start with executive education, data foundations, and identifying high-value use cases.', percentile: 'Bottom 25%' };
+      if (score >= 80) return { level: 'AI Pioneer',  desc: 'Leading the way in AI transformation', detail: 'Your organization demonstrates exceptional AI maturity across all dimensions.', percentile: 'Top 10%' };
+      if (score >= 60) return { level: 'AI Adopter',  desc: 'Actively implementing AI solutions',   detail: 'Solid AI foundations. Focus on scaling successful initiatives.', percentile: 'Top 25%' };
+      if (score >= 40) return { level: 'AI Explorer', desc: 'Exploring AI opportunities',           detail: 'Foundational capabilities in place. Time to develop a strategic roadmap.', percentile: 'Top 50%' };
+      if (score >= 20) return { level: 'AI Aware',    desc: 'Beginning AI awareness journey',       detail: 'Foundational data infrastructure and AI literacy should be priorities.', percentile: 'Bottom 50%' };
+      return                  { level: 'AI Novice',   desc: 'Early stage of AI readiness',          detail: 'Just beginning the AI journey. Start with executive education and data foundations.', percentile: 'Bottom 25%' };
     }
     function recommendationsFor(catScores) {
       const map = {
-        strategy:   { type: 'critical', title: 'Develop a comprehensive AI strategy',         desc: 'Build a clear AI roadmap aligned with business goals. Define KPIs, allocate resources, and secure executive sponsorship.' },
-        data:       { type: 'critical', title: 'Strengthen your data foundation',             desc: 'Invest in data quality, governance, and a central data platform (lake or warehouse) before scaling AI workloads.' },
-        tech:       { type: 'warning',  title: 'Modernize your technology stack',             desc: 'Adopt cloud-native infrastructure, AI platforms, and a robust integration layer for AI/ML tools.' },
-        people:     { type: 'warning',  title: 'Accelerate AI skills and culture',            desc: 'Run AI literacy programs, hire or partner for AI specialists, and embed data-driven decision making.' },
-        governance: { type: 'critical', title: 'Establish AI governance and ethics',          desc: 'Define ethical AI guidelines, bias monitoring, and ensure GDPR/data privacy compliance for AI deployments.' },
-        innovation: { type: 'warning',  title: 'Launch AI pilots and measure ROI',            desc: 'Start targeted PoCs with clear KPIs, embed an evaluation process, and track business value of tech investments.' }
+        strategy:   { type: 'critical', title: 'Develop a comprehensive AI strategy', desc: "Build a clear AI roadmap aligned with business goals. Define KPIs, allocate resources, and secure executive sponsorship." },
+        data:       { type: 'critical', title: 'Strengthen your data foundation',     desc: "Invest in data quality, governance, and a central data platform before scaling AI workloads." },
+        tech:       { type: 'warning',  title: 'Modernize your technology stack',     desc: "Adopt cloud-native infrastructure, AI platforms, and a robust integration layer." },
+        people:     { type: 'warning',  title: 'Accelerate AI skills and culture',    desc: "Run AI literacy programs, hire AI specialists, and embed data-driven decision making." },
+        governance: { type: 'critical', title: 'Establish AI governance and ethics',  desc: "Define ethical AI guidelines, bias monitoring, and ensure GDPR compliance for AI." },
+        innovation: { type: 'warning',  title: 'Launch AI pilots and measure ROI',    desc: "Start targeted PoCs with clear KPIs and track business value of tech investments." }
       };
       const out = [];
-      catScores.forEach(c => {
-        if (c.score < 50 && map[c.id]) out.push({ ...map[c.id], catId: c.id, catLabel: c.short });
-      });
-      if (out.length === 0) {
-        out.push({ type: 'success', title: 'Strong AI readiness across the board', desc: 'Your organization shows strong AI readiness in every dimension. Focus on scaling, governance maturity, and continuous innovation.' });
-      }
+      catScores.forEach(c => { if (c.score < 50 && map[c.id]) out.push({ ...map[c.id], catId: c.id, catLabel: c.label }); });
+      if (out.length === 0) out.push({ type: 'success', title: 'Strong AI readiness across the board', desc: 'Your organization shows strong AI readiness in every dimension. Focus on scaling and continuous innovation.' });
       return out;
     }
-
-    /* ============================================================
-     *  Heat map helpers
-     * ============================================================ */
     function heatColor(s) {
       if (s >= 67) return 'linear-gradient(135deg, #27AE60, #2ECC71)';
       if (s >= 34) return 'linear-gradient(135deg, #F39C12, #F1C40F)';
       return         'linear-gradient(135deg, #E74C3C, #EC7063)';
     }
-    function heatLabel(s) {
-      if (s >= 67) return 'Good';
-      if (s >= 34) return 'Medium';
-      return 'Critical';
+    function heatLabelOf(s) { return s >= 67 ? 'Good' : s >= 34 ? 'Medium' : 'Critical'; }
+
+    /* ============================================================
+     *  Shared styles (inline, like the real project)
+     * ============================================================ */
+    const S = {
+      page:     { minHeight: '100vh', background: '#F7F9FC', fontFamily: 'Outfit, sans-serif', color: '#1B3A5C' },
+      shell:    { maxWidth: 1100, margin: '0 auto', padding: '20px 20px 40px' },
+      headerCard: { background: 'linear-gradient(135deg, #1B3A5C, #2E86C1)', color: '#fff', padding: '24px 32px', borderRadius: 16, marginBottom: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 },
+      headerLeft: { display: 'flex', alignItems: 'center', gap: 14 },
+      logoBox:  { width: 44, height: 44, borderRadius: 10, background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 800 },
+      headerTitle: { fontSize: 20, fontWeight: 700, margin: 0 },
+      headerSub: { fontSize: 12, opacity: 0.85, marginTop: 2 },
+      headerActions: { display: 'flex', gap: 8, alignItems: 'center' },
+      btnGhost: { background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.25)', padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
+      card:     { background: '#fff', borderRadius: 16, padding: 28, boxShadow: '0 4px 20px rgba(27,58,92,0.06)', marginBottom: 20 },
+      tabs:     { display: 'flex', gap: 4, background: '#F7F9FC', padding: 4, borderRadius: 12, marginBottom: 24, flexWrap: 'wrap' },
+      tab:      (active, done) => ({
+        flex: 1, minWidth: 130, padding: '12px 14px', border: 'none',
+        background: active ? '#fff' : 'transparent',
+        boxShadow: active ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
+        borderRadius: 8, cursor: 'pointer', fontSize: 13, fontWeight: 500,
+        color: active ? '#1B3A5C' : '#5D6D7E', transition: 'all .2s',
+        fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center'
+      }),
+      sectionTitle: { fontSize: 20, fontWeight: 600, color: '#1B3A5C', marginBottom: 16, paddingBottom: 12, borderBottom: '2px solid #E8EDF2', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 },
+      badge:    { background: 'linear-gradient(135deg, #1B3A5C, #2E86C1)', color: '#fff', padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 500 },
+      progressTrack: { background: '#E8EDF2', height: 8, borderRadius: 4, overflow: 'hidden', marginBottom: 20 },
+      progressFill:  (pct) => ({ background: 'linear-gradient(90deg, #2E86C1, #1B3A5C)', height: '100%', width: pct + '%', transition: 'width 0.3s' }),
+      input:    { width: '100%', padding: '12px 14px', border: '2px solid #E8EDF2', borderRadius: 10, fontSize: 14, color: '#1B3A5C', fontFamily: 'inherit', background: '#fff', outline: 'none' },
+      label:    { display: 'block', marginBottom: 6, fontSize: 14, fontWeight: 500, color: '#1B3A5C' },
+      qBlock:   { padding: '16px 0', borderBottom: '1px solid #F0F2F5' },
+      qLabel:   { fontSize: 15, color: '#1B3A5C', fontWeight: 500, marginBottom: 10 },
+      helpDot:  { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 16, height: 16, borderRadius: '50%', background: '#E8EDF2', color: '#5D6D7E', fontSize: 11, fontWeight: 600, marginLeft: 6, cursor: 'help', verticalAlign: 'middle' },
+      pillGroup: { display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 },
+      pill:     (selected) => ({
+        padding: '8px 14px',
+        border: '2px solid ' + (selected ? '#1B3A5C' : '#E8EDF2'),
+        background: selected ? 'linear-gradient(135deg, #1B3A5C, #2E86C1)' : '#fff',
+        color: selected ? '#fff' : '#1B3A5C',
+        borderRadius: 20, fontSize: 13, cursor: 'pointer', userSelect: 'none',
+        transition: 'all .2s', fontFamily: 'inherit'
+      }),
+      btn:      { background: 'linear-gradient(135deg, #1B3A5C, #2E86C1)', color: '#fff', padding: '12px 24px', border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+      btnSec:   { background: '#fff', color: '#1B3A5C', padding: '12px 24px', border: '2px solid #E8EDF2', borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+      nav:      { display: 'flex', justifyContent: 'space-between', paddingTop: 20, marginTop: 20, borderTop: '2px solid #F0F2F5', gap: 12, flexWrap: 'wrap' },
+      alert:    (kind) => {
+        const map = {
+          info:     { bg: '#EBF5FB', border: '#3498DB', color: '#1F618D' },
+          warning:  { bg: '#FEF9E7', border: '#F39C12', color: '#7D5A00' },
+          danger:   { bg: '#FDEDEC', border: '#E74C3C', color: '#922B21' },
+          success:  { bg: '#EAFAF1', border: '#27AE60', color: '#1E8449' }
+        };
+        const c = map[kind] || map.info;
+        return { padding: '14px 18px', borderRadius: 10, marginBottom: 14, fontSize: 14, lineHeight: 1.5, background: c.bg, borderLeft: '4px solid ' + c.border, color: c.color };
+      },
+      infoCard: { background: '#F7F9FC', padding: 16, borderRadius: 10 },
+      infoLabel: { fontSize: 11, color: '#7F8C8D', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 },
+      infoValue: { fontSize: 22, fontWeight: 700, color: '#1B3A5C' },
+      grid3:    { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }
+    };
+
+    /* ============================================================
+     *  Reusable Header card (used by ALL views)
+     * ============================================================ */
+    function HeaderCard({ user, onLogout, onShowAnalytics }) {
+      return (
+        <div style={S.headerCard}>
+          <div style={S.headerLeft}>
+            <div style={S.logoBox}>a</div>
+            <div>
+              <div style={S.headerTitle}>Adesso AI Readiness Check</div>
+              <div style={S.headerSub}>Discover your organization's AI maturity</div>
+            </div>
+          </div>
+          <div style={S.headerActions}>
+            {onShowAnalytics && <button style={S.btnGhost} onClick={onShowAnalytics}>📊 Analytics</button>}
+            {user && <span style={{ fontSize: 13, opacity: 0.85, color: '#fff' }}>{user.name || user.email}</span>}
+            {user && <button style={S.btnGhost} onClick={onLogout}>Sign out</button>}
+          </div>
+        </div>
+      );
     }
 
     /* ============================================================
@@ -313,8 +280,7 @@
 
       const submit = (e) => {
         e && e.preventDefault();
-        setLoading(true);
-        setError('');
+        setLoading(true); setError('');
         setTimeout(() => {
           const m = ALLOWED_USERS.find(u =>
             u.email.toLowerCase() === email.trim().toLowerCase() && u.password === password
@@ -332,42 +298,28 @@
       return (
         <div style={{
           minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: 'linear-gradient(135deg, #F5F7FA 0%, #E8EDF2 100%)', padding: 20
+          background: 'linear-gradient(135deg, #F5F7FA 0%, #E8EDF2 100%)', padding: 20, fontFamily: 'Outfit, sans-serif'
         }}>
-          <div style={{
-            background: '#fff', borderRadius: 24, boxShadow: '0 20px 60px rgba(27,58,92,0.15)',
-            padding: 48, maxWidth: 480, width: '100%'
-          }}>
+          <div style={{ background: '#fff', borderRadius: 24, boxShadow: '0 20px 60px rgba(27,58,92,0.15)', padding: 48, maxWidth: 480, width: '100%' }}>
             <div style={{ textAlign: 'center', marginBottom: 32 }}>
-              <div style={{
-                display: 'inline-block', background: 'linear-gradient(135deg, #1B3A5C, #2E5C8A)',
-                color: '#fff', padding: '14px 22px', borderRadius: 16, fontSize: 22, fontWeight: 800,
-                marginBottom: 16
-              }}>
+              <div style={{ display: 'inline-block', background: 'linear-gradient(135deg, #1B3A5C, #2E86C1)', color: '#fff', padding: '14px 22px', borderRadius: 16, fontSize: 22, fontWeight: 800, marginBottom: 16 }}>
                 Adesso AI Readiness Check
               </div>
-              <p style={{ color: '#5D6D7E', fontSize: 14, margin: 0 }}>
-                Sign in to access the assessment
-              </p>
+              <p style={{ color: '#5D6D7E', fontSize: 14, margin: 0 }}>Sign in to access the assessment</p>
             </div>
-
             <form onSubmit={submit}>
               <div style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', marginBottom: 6, fontSize: 14, fontWeight: 500, color: '#1B3A5C' }}>Email</label>
-                <input
-                  type="email" autoFocus className="input" placeholder="firstname.lastname@adesso-group.com"
-                  value={email} onChange={e => setEmail(e.target.value)} disabled={loading}
-                />
+                <label style={S.label}>Email</label>
+                <input type="email" autoFocus style={S.input} placeholder="firstname.lastname@adesso-group.com"
+                  value={email} onChange={e => setEmail(e.target.value)} disabled={loading} />
               </div>
               <div style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', marginBottom: 6, fontSize: 14, fontWeight: 500, color: '#1B3A5C' }}>Password</label>
-                <input
-                  type="password" className="input" placeholder="••••••••"
-                  value={password} onChange={e => setPassword(e.target.value)} disabled={loading}
-                />
+                <label style={S.label}>Password</label>
+                <input type="password" style={S.input} placeholder="••••••••"
+                  value={password} onChange={e => setPassword(e.target.value)} disabled={loading} />
               </div>
-              {error && <div className="alert danger" style={{ marginBottom: 16 }}>{error}</div>}
-              <button type="submit" className="button button-block" disabled={loading}>
+              {error && <div style={S.alert('danger')}>{error}</div>}
+              <button type="submit" style={{ ...S.btn, width: '100%' }} disabled={loading}>
                 {loading ? 'Signing in…' : 'Sign in'}
               </button>
               <p style={{ textAlign: 'center', color: '#7F8C8D', fontSize: 12, marginTop: 20 }}>
@@ -380,399 +332,32 @@
     }
 
     /* ============================================================
-     *  Header
+     *  Tabs row (used on Assessment AND Analytics views)
      * ============================================================ */
-    function Header({ user, onLogout, onShowAnalytics }) {
+    function TabsRow({ tabs, activeId, onSelect, isDone }) {
       return (
-        <div className="header">
-          <div className="header-left">
-            <div className="header-logo">a</div>
-            <div>
-              <div className="header-title">Adesso AI Readiness Check</div>
-              <div className="header-sub">Discover your organization's AI maturity</div>
-            </div>
-          </div>
-          <div className="header-actions">
-            {onShowAnalytics && (
-              <button className="btn-ghost" onClick={onShowAnalytics}>📊 Analytics</button>
-            )}
-            {user && (
-              <span style={{ fontSize: 13, opacity: 0.85 }}>
-                {user.name || user.email}
-              </span>
-            )}
-            {user && <button className="btn-ghost" onClick={onLogout}>Sign out</button>}
-          </div>
+        <div style={S.tabs}>
+          {tabs.map(t => {
+            const active = t.id === activeId;
+            const done = isDone ? isDone(t.id) : false;
+            return (
+              <button key={t.id} style={S.tab(active, done)} onClick={() => onSelect(t.id)}>
+                {t.icon && <span>{t.icon}</span>}
+                <span>{t.label}</span>
+                {done && <span style={{ color: '#27AE60' }}>✓</span>}
+              </button>
+            );
+          })}
         </div>
       );
     }
 
     /* ============================================================
-     *  Unified Dashboard + Assessment view
-     *  Single shell: header + progress + tabs (Profile + 6 sections)
+     *  Assessment view (Profile + 6 dimension tabs, all in one shell)
      * ============================================================ */
-    function AssessmentForm({ user, onComplete, onLogout, onShowAnalytics }) {
-      // Tabs: profile + the 6 assessment sections
-      const allTabs = [{ id: 'profile', label: 'Profile', short: 'Company profile', description: 'Tell us about your organization to personalize the assessment.' }, ...sections];
-
-      const [activeTab, setActiveTab] = useState('profile');
-      const [companyName, setCompanyName] = useState('');
-      const [contactName, setContactName] = useState(user?.name || '');
-      const [email, setEmail] = useState('');
-      const [answers, setAnswers] = useState({});
-      const [showHelp, setShowHelp] = useState({});
-      const [errors, setErrors] = useState({});
-
-      // Restore in-progress draft on mount
-      useEffect(() => {
-        const p = storage.getProgress();
-        if (p) {
-          if (p.companyName) setCompanyName(p.companyName);
-          if (p.contactName) setContactName(p.contactName);
-          if (p.email) setEmail(p.email);
-          if (p.answers) setAnswers(p.answers);
-          if (p.activeTab) setActiveTab(p.activeTab);
-        }
-      }, []);
-
-      // Auto-save
-      useEffect(() => {
-        if (companyName || email || Object.keys(answers).length > 0) {
-          storage.saveProgress({ companyName, contactName, email, answers, activeTab });
-        }
-      }, [companyName, contactName, email, answers, activeTab]);
-
-      const profileValid = companyName.trim() && email.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-      const totalQ = questions.length;
-      const answered = Object.keys(answers).length;
-      const percent = Math.round(((profileValid ? 1 : 0) * 5 + (answered / totalQ) * 95));
-
-      const sectionDone = (sid) => sid === 'profile'
-        ? profileValid
-        : questions.filter(q => q.category === sid).every(q => answers[q.id] !== undefined);
-      const allDone = profileValid && sections.every(s => sectionDone(s.id));
-
-      const setAnswer = (qid, value) => setAnswers(prev => ({ ...prev, [qid]: value }));
-
-      const goNext = () => {
-        const idx = allTabs.findIndex(t => t.id === activeTab);
-
-        // Validate profile before allowing to leave it
-        if (activeTab === 'profile') {
-          const ne = {};
-          if (!companyName.trim()) ne.companyName = 'Company name is required';
-          if (!email.trim()) ne.email = 'Email is required';
-          else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) ne.email = 'Please enter a valid email';
-          setErrors(ne);
-          if (Object.keys(ne).length > 0) return;
-        }
-
-        if (idx < allTabs.length - 1) setActiveTab(allTabs[idx + 1].id);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      };
-      const goPrev = () => {
-        const idx = allTabs.findIndex(t => t.id === activeTab);
-        if (idx > 0) setActiveTab(allTabs[idx - 1].id);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      };
-      const submitAll = () => {
-        storage.clearProgress();
-        onComplete({ companyName, contactName, email, answers });
-      };
-
-      const tab = allTabs.find(t => t.id === activeTab);
-      const tabIdx = allTabs.findIndex(t => t.id === activeTab);
-      const isProfile = activeTab === 'profile';
-      const sectionQuestions = isProfile ? [] : questions.filter(q => q.category === activeTab);
-
-      return (
-        <div className="app">
-          <div className="container">
-            <Header user={user} onLogout={onLogout} onShowAnalytics={onShowAnalytics} />
-            <div className="content">
-              <div className="section-title">
-                {companyName ? 'Assessment for ' + companyName : 'AI Readiness Assessment'}
-                <span className="section-badge">{answered}/{totalQ} answered</span>
-              </div>
-
-              <div className="progress-track">
-                <div className="progress-fill" style={{ width: percent + '%' }} />
-              </div>
-
-              <div className="tabs">
-                {allTabs.map(t => (
-                  <button
-                    key={t.id}
-                    className={'tab' + (t.id === activeTab ? ' active' : '') + (sectionDone(t.id) ? ' complete' : '')}
-                    onClick={() => setActiveTab(t.id)}
-                  >
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-
-              <div className="section-title">
-                {tab.short}
-                <span className="section-badge">Step {tabIdx + 1} of {allTabs.length}</span>
-              </div>
-              <div className="alert info">{tab.description}</div>
-
-              {isProfile ? (
-                <>
-                  <div className="grid-3" style={{ marginBottom: 16 }}>
-                    <div className="info-card">
-                      <div className="info-card-label">Strategic questions</div>
-                      <div className="info-card-value">15</div>
-                    </div>
-                    <div className="info-card">
-                      <div className="info-card-label">Maturity dimensions</div>
-                      <div className="info-card-value">6</div>
-                    </div>
-                    <div className="info-card">
-                      <div className="info-card-label">Estimated time</div>
-                      <div className="info-card-value">~5 min</div>
-                    </div>
-                  </div>
-
-                  <div className="grid-2">
-                    <div>
-                      <div className="q-block" style={{ borderBottom: 'none', padding: '8px 0' }}>
-                        <label className="q-label">Your name (optional)</label>
-                        <input className="input" placeholder="e.g., Roman Borvitz"
-                          value={contactName} onChange={e => setContactName(e.target.value)} />
-                      </div>
-                    </div>
-                    <div>
-                      <div className="q-block" style={{ borderBottom: 'none', padding: '8px 0' }}>
-                        <label className="q-label">Business email <span style={{ color: '#E74C3C' }}>*</span></label>
-                        <input className="input" type="email" placeholder="firstname.lastname@adesso-group.com"
-                          value={email} onChange={e => setEmail(e.target.value)} />
-                        {errors.email && <div className="alert danger" style={{ marginTop: 8, padding: '8px 12px' }}>{errors.email}</div>}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="q-block" style={{ borderBottom: 'none', padding: '8px 0' }}>
-                    <label className="q-label">Company name <span style={{ color: '#E74C3C' }}>*</span></label>
-                    <input className="input" placeholder="Your company"
-                      value={companyName} onChange={e => setCompanyName(e.target.value)} />
-                    {errors.companyName && <div className="alert danger" style={{ marginTop: 8, padding: '8px 12px' }}>{errors.companyName}</div>}
-                  </div>
-                </>
-              ) : (
-                sectionQuestions.map(q => (
-                  <div className="q-block" key={q.id}>
-                    <div className="q-label">
-                      {q.text}
-                      {q.helpText && (
-                        <span
-                          className="q-help"
-                          title={q.helpText}
-                          onClick={() => setShowHelp(prev => ({ ...prev, [q.id]: !prev[q.id] }))}
-                        >?</span>
-                      )}
-                    </div>
-                    {showHelp[q.id] && q.helpText && (
-                      <div className="alert info" style={{ padding: '10px 12px', fontSize: 13, marginBottom: 10 }}>
-                        {q.helpText}
-                      </div>
-                    )}
-                    <div className="pill-group">
-                      {responseOptions.map(opt => (
-                        <button
-                          key={opt.value}
-                          type="button"
-                          className={'pill' + (answers[q.id] === opt.value ? ' selected' : '')}
-                          onClick={() => setAnswer(q.id, opt.value)}
-                          title={opt.desc}
-                        >
-                          {opt.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))
-              )}
-
-              <div className="nav">
-                <button className="button button-secondary" onClick={goPrev} disabled={tabIdx === 0}>
-                  ← Previous
-                </button>
-                {tabIdx === allTabs.length - 1 ? (
-                  <button className="button" onClick={submitAll} disabled={!allDone}>
-                    View results →
-                  </button>
-                ) : (
-                  <button className="button" onClick={goNext}>
-                    Next section →
-                  </button>
-                )}
-              </div>
-
-              {!allDone && tabIdx === allTabs.length - 1 && (
-                <div className="alert warning" style={{ marginTop: 16 }}>
-                  Please complete your profile and answer all questions before viewing your results.
-                </div>
-              )}
-            </div>
-            <div className="footer-tagline">Your progress is auto-saved locally · 100% confidential</div>
-          </div>
-        </div>
-      );
-    }
-
-    /* ============================================================
-     *  HeatMap component (SAP-style cells)
-     * ============================================================ */
-    function HeatMap({ catScores }) {
-      return (
-        <div>
-          <div className="section-title">Maturity heat map</div>
-          <div className="heat-grid">
-            {catScores.map(c => (
-              <div key={c.id}>
-                <div className="heat-cell" style={{ background: heatColor(c.score) }}>
-                  <div className="num">{c.score}</div>
-                  <div className="lab">{heatLabel(c.score)}</div>
-                </div>
-                <div className="heat-name">{c.short}</div>
-              </div>
-            ))}
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'center', marginTop: 18, fontSize: 12, color: '#5D6D7E' }}>
-            <span><span style={{ display: 'inline-block', width: 14, height: 14, background: 'linear-gradient(135deg,#E74C3C,#EC7063)', borderRadius: 4, verticalAlign: 'middle', marginRight: 6 }} />0–33 Critical</span>
-            <span><span style={{ display: 'inline-block', width: 14, height: 14, background: 'linear-gradient(135deg,#F39C12,#F1C40F)', borderRadius: 4, verticalAlign: 'middle', marginRight: 6 }} />34–66 Medium</span>
-            <span><span style={{ display: 'inline-block', width: 14, height: 14, background: 'linear-gradient(135deg,#27AE60,#2ECC71)', borderRadius: 4, verticalAlign: 'middle', marginRight: 6 }} />67–100 Good</span>
-          </div>
-        </div>
-      );
-    }
-
-    /* ============================================================
-     *  Results page
-     * ============================================================ */
-    function ResultsPage({ companyName, contactName, email, answers, onRestart, onShowAnalytics, onLogout, user }) {
-      const overall = calcOverall(answers);
-      const m = maturity(overall);
-      const catScores = sections.map(s => ({
-        id: s.id, label: s.label, short: s.short, score: calcCategory(s.id, answers)
-      }));
-      const recs = recommendationsFor(catScores);
-
-      useEffect(() => {
-        storage.saveResponse({
-          companyName, contactName, email,
-          overallScore: overall,
-          maturityLevel: m.level,
-          categoryScores: catScores.map(c => ({ id: c.id, name: c.short, score: c.score })),
-          answers
-        });
-        // eslint-disable-next-line
-      }, []);
-
-      const downloadHtml = () => {
-        const html =
-          '<!DOCTYPE html><html><head><meta charset="utf-8"><title>AI Readiness Report — ' + companyName + '</title>' +
-          '<style>body{font-family:-apple-system,sans-serif;max-width:800px;margin:40px auto;padding:20px;color:#1B3A5C}' +
-          'h1{color:#1B3A5C}h2{color:#2E5C8A;margin-top:30px;border-bottom:2px solid #E8EDF2;padding-bottom:8px}' +
-          '.score{font-size:56px;font-weight:800;color:#1B3A5C}.row{padding:10px 14px;background:#F7F9FC;border-radius:8px;margin:8px 0}' +
-          '.rec{padding:14px 18px;border-left:4px solid #2E5C8A;background:#EBF5FB;border-radius:8px;margin:10px 0}' +
-          '</style></head><body>' +
-          '<h1>Adesso AI Readiness Report</h1>' +
-          '<p><strong>Company:</strong> ' + companyName + (contactName ? ' &middot; <strong>Prepared for:</strong> ' + contactName : '') + '</p>' +
-          '<p><strong>Date:</strong> ' + new Date().toLocaleDateString() + '</p>' +
-          '<h2>Overall score</h2><div class="score">' + overall + '/100</div>' +
-          '<p><strong>Maturity level:</strong> ' + m.level + ' (' + m.percentile + ')</p>' +
-          '<p>' + m.detail + '</p>' +
-          '<h2>Category scores</h2>' +
-          catScores.map(c => '<div class="row"><strong>' + c.short + ':</strong> ' + c.score + '/100</div>').join('') +
-          '<h2>Recommendations</h2>' +
-          recs.map(r => '<div class="rec"><strong>' + r.title + '</strong><br/>' + r.desc + '</div>').join('') +
-          '</body></html>';
-        const blob = new Blob([html], { type: 'text/html' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = 'AI_Readiness_Report_' + companyName.replace(/\s+/g, '_') + '.html'; a.click();
-      };
-
-      return (
-        <div className="app">
-          <div className="container">
-            <Header user={user} onLogout={onLogout} onShowAnalytics={onShowAnalytics} />
-            <div className="content">
-              <div className="section-title">
-                Results for {companyName}
-                <span className="section-badge">Complete ✓</span>
-              </div>
-
-              <div className="score-card">
-                <div className="score-label">Overall AI Readiness Score</div>
-                <div className="score-value">{overall}</div>
-                <div className="score-sub">{m.level} · {m.desc}</div>
-                <div style={{ marginTop: 10, fontSize: 12, opacity: 0.85 }}>{m.percentile}</div>
-              </div>
-
-              <div className="alert info">
-                <div><strong>What this means</strong><br/>{m.detail}</div>
-              </div>
-
-              <div className="section-title" style={{ marginTop: 24 }}>Scores by dimension</div>
-              <div className="grid-3">
-                {catScores.map(c => (
-                  <div className="info-card" key={c.id}>
-                    <div className="info-card-label">{c.short}</div>
-                    <div className="info-card-value">{c.score} <span style={{ fontSize: 13, color: '#7F8C8D', fontWeight: 500 }}>/ 100</span></div>
-                    <div className="progress-track" style={{ marginTop: 10, marginBottom: 0 }}>
-                      <div className="progress-fill" style={{ width: c.score + '%' }} />
-                    </div>
-                    <div style={{ fontSize: 12, color: '#5D6D7E', marginTop: 8 }}>
-                      {c.score >= 70 ? '✓ Strong' : c.score >= 50 ? '○ Developing' : '⚠ Needs focus'}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div style={{ marginTop: 32 }}>
-                <HeatMap catScores={catScores} />
-              </div>
-
-              <div className="section-title" style={{ marginTop: 32 }}>Recommendations</div>
-              {recs.map((r, i) => (
-                <div key={i} className={'recommendation ' + (r.type || 'info')}>
-                  <strong>{r.title}{r.catLabel ? ' — ' + r.catLabel : ''}</strong>
-                  {r.desc}
-                </div>
-              ))}
-
-              <div className="alert success" style={{ marginTop: 24 }}>
-                <div>
-                  <strong>Ready to accelerate your AI journey?</strong><br/>
-                  Adesso's experts can help you turn these insights into action — strategy workshops,
-                  data assessments, PoC development, and AI training programs.
-                </div>
-              </div>
-
-              <div className="nav">
-                <button className="button button-secondary" onClick={onRestart}>← Take another assessment</button>
-                <div style={{ display: 'flex', gap: 10 }}>
-                  <button className="button button-secondary" onClick={onShowAnalytics}>📊 Analytics</button>
-                  <button className="button" onClick={downloadHtml}>⬇ Download report</button>
-                </div>
-              </div>
-            </div>
-            <div className="footer-tagline">Generated for {companyName} · {new Date().toLocaleDateString()}</div>
-          </div>
-        </div>
-      );
-    }
-
-    /* ============================================================
-     *  Unified Dashboard + Assessment view
-     *  One shell: header + progress + tabs (Profile + 6 dimensions)
-     * ============================================================ */
-    function AssessmentForm({ user, onComplete, onLogout, onShowAnalytics }) {
-      const allTabs = [
-        { id: 'profile', label: 'Profile', short: 'Company profile', description: 'Tell us about your organization to personalize the assessment.' },
+    function AssessmentView({ user, onComplete, onLogout, onShowAnalytics }) {
+      const tabs = [
+        { id: 'profile', label: 'Profile', icon: '🏢', description: 'Tell us about your organization to personalize the assessment.' },
         ...sections
       ];
 
@@ -822,13 +407,13 @@
           setErrors(ne);
           if (Object.keys(ne).length > 0) return;
         }
-        const idx = allTabs.findIndex(t => t.id === activeTab);
-        if (idx < allTabs.length - 1) setActiveTab(allTabs[idx + 1].id);
+        const idx = tabs.findIndex(t => t.id === activeTab);
+        if (idx < tabs.length - 1) setActiveTab(tabs[idx + 1].id);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       };
       const goPrev = () => {
-        const idx = allTabs.findIndex(t => t.id === activeTab);
-        if (idx > 0) setActiveTab(allTabs[idx - 1].id);
+        const idx = tabs.findIndex(t => t.id === activeTab);
+        if (idx > 0) setActiveTab(tabs[idx - 1].id);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       };
       const submitAll = () => {
@@ -836,112 +421,79 @@
         onComplete({ companyName, contactName, email, answers });
       };
 
-      const tab = allTabs.find(t => t.id === activeTab);
-      const tabIdx = allTabs.findIndex(t => t.id === activeTab);
+      const tab = tabs.find(t => t.id === activeTab);
+      const tabIdx = tabs.findIndex(t => t.id === activeTab);
       const isProfile = activeTab === 'profile';
       const sectionQuestions = isProfile ? [] : questions.filter(q => q.category === activeTab);
 
       return (
-        <div className="app">
-          <div className="container">
-            <Header user={user} onLogout={onLogout} onShowAnalytics={onShowAnalytics} />
-            <div className="content">
-              <div className="section-title">
+        <div style={S.page}>
+          <div style={S.shell}>
+            <HeaderCard user={user} onLogout={onLogout} onShowAnalytics={onShowAnalytics} />
+
+            <div style={S.card}>
+              <div style={S.sectionTitle}>
                 {companyName ? 'Assessment for ' + companyName : 'AI Readiness Assessment'}
-                <span className="section-badge">{answered}/{totalQ} answered</span>
+                <span style={S.badge}>{answered}/{totalQ} answered · {percent}%</span>
               </div>
 
-              <div className="progress-track">
-                <div className="progress-fill" style={{ width: percent + '%' }} />
-              </div>
+              <div style={S.progressTrack}><div style={S.progressFill(percent)} /></div>
 
-              <div className="tabs">
-                {allTabs.map(t => (
-                  <button
-                    key={t.id}
-                    className={'tab' + (t.id === activeTab ? ' active' : '') + (tabDone(t.id) ? ' complete' : '')}
-                    onClick={() => setActiveTab(t.id)}
-                  >
-                    {t.label}
-                  </button>
-                ))}
-              </div>
+              <TabsRow tabs={tabs} activeId={activeTab} onSelect={setActiveTab} isDone={tabDone} />
 
-              <div className="section-title">
-                {tab.short}
-                <span className="section-badge">Step {tabIdx + 1} of {allTabs.length}</span>
+              <div style={S.sectionTitle}>
+                {tab.icon} {tab.label}
+                <span style={S.badge}>Step {tabIdx + 1} of {tabs.length}</span>
               </div>
-              <div className="alert info">{tab.description}</div>
+              <div style={S.alert('info')}>{tab.description}</div>
 
               {isProfile ? (
                 <>
-                  <div className="grid-3" style={{ marginBottom: 16 }}>
-                    <div className="info-card">
-                      <div className="info-card-label">Strategic questions</div>
-                      <div className="info-card-value">15</div>
+                  <div style={{ ...S.grid3, marginBottom: 20 }}>
+                    <div style={S.infoCard}><div style={S.infoLabel}>Strategic questions</div><div style={S.infoValue}>15</div></div>
+                    <div style={S.infoCard}><div style={S.infoLabel}>Maturity dimensions</div><div style={S.infoValue}>6</div></div>
+                    <div style={S.infoCard}><div style={S.infoLabel}>Estimated time</div><div style={S.infoValue}>~5 min</div></div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 16, marginBottom: 16 }}>
+                    <div>
+                      <label style={S.label}>Your name (optional)</label>
+                      <input style={S.input} placeholder="e.g., Roman Borvitz"
+                        value={contactName} onChange={e => setContactName(e.target.value)} />
                     </div>
-                    <div className="info-card">
-                      <div className="info-card-label">Maturity dimensions</div>
-                      <div className="info-card-value">6</div>
-                    </div>
-                    <div className="info-card">
-                      <div className="info-card-label">Estimated time</div>
-                      <div className="info-card-value">~5 min</div>
+                    <div>
+                      <label style={S.label}>Business email <span style={{ color: '#E74C3C' }}>*</span></label>
+                      <input type="email" style={S.input} placeholder="firstname.lastname@adesso-group.com"
+                        value={email} onChange={e => setEmail(e.target.value)} />
+                      {errors.email && <div style={{ ...S.alert('danger'), marginTop: 8, padding: '8px 12px' }}>{errors.email}</div>}
                     </div>
                   </div>
 
-                  <div className="grid-2">
-                    <div>
-                      <div className="q-block" style={{ borderBottom: 'none', padding: '8px 0' }}>
-                        <label className="q-label">Your name (optional)</label>
-                        <input className="input" placeholder="e.g., Roman Borvitz"
-                          value={contactName} onChange={e => setContactName(e.target.value)} />
-                      </div>
-                    </div>
-                    <div>
-                      <div className="q-block" style={{ borderBottom: 'none', padding: '8px 0' }}>
-                        <label className="q-label">Business email <span style={{ color: '#E74C3C' }}>*</span></label>
-                        <input className="input" type="email" placeholder="firstname.lastname@adesso-group.com"
-                          value={email} onChange={e => setEmail(e.target.value)} />
-                        {errors.email && <div className="alert danger" style={{ marginTop: 8, padding: '8px 12px' }}>{errors.email}</div>}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="q-block" style={{ borderBottom: 'none', padding: '8px 0' }}>
-                    <label className="q-label">Company name <span style={{ color: '#E74C3C' }}>*</span></label>
-                    <input className="input" placeholder="Your company"
+                  <div>
+                    <label style={S.label}>Company name <span style={{ color: '#E74C3C' }}>*</span></label>
+                    <input style={S.input} placeholder="Your company"
                       value={companyName} onChange={e => setCompanyName(e.target.value)} />
-                    {errors.companyName && <div className="alert danger" style={{ marginTop: 8, padding: '8px 12px' }}>{errors.companyName}</div>}
+                    {errors.companyName && <div style={{ ...S.alert('danger'), marginTop: 8, padding: '8px 12px' }}>{errors.companyName}</div>}
                   </div>
                 </>
               ) : (
                 sectionQuestions.map(q => (
-                  <div className="q-block" key={q.id}>
-                    <div className="q-label">
+                  <div style={S.qBlock} key={q.id}>
+                    <div style={S.qLabel}>
                       {q.text}
                       {q.helpText && (
-                        <span
-                          className="q-help"
-                          title={q.helpText}
-                          onClick={() => setShowHelp(prev => ({ ...prev, [q.id]: !prev[q.id] }))}
-                        >?</span>
+                        <span style={S.helpDot} title={q.helpText}
+                          onClick={() => setShowHelp(prev => ({ ...prev, [q.id]: !prev[q.id] }))}>?</span>
                       )}
                     </div>
                     {showHelp[q.id] && q.helpText && (
-                      <div className="alert info" style={{ padding: '10px 12px', fontSize: 13, marginBottom: 10 }}>
-                        {q.helpText}
-                      </div>
+                      <div style={{ ...S.alert('info'), padding: '10px 12px', fontSize: 13, marginBottom: 10 }}>{q.helpText}</div>
                     )}
-                    <div className="pill-group">
+                    <div style={S.pillGroup}>
                       {responseOptions.map(opt => (
-                        <button
-                          key={opt.value}
-                          type="button"
-                          className={'pill' + (answers[q.id] === opt.value ? ' selected' : '')}
-                          onClick={() => setAnswer(q.id, opt.value)}
-                          title={opt.desc}
-                        >
+                        <button key={opt.value} type="button" title={opt.desc}
+                          style={S.pill(answers[q.id] === opt.value)}
+                          onClick={() => setAnswer(q.id, opt.value)}>
                           {opt.label}
                         </button>
                       ))}
@@ -950,32 +502,302 @@
                 ))
               )}
 
-              <div className="nav">
-                <button className="button button-secondary" onClick={goPrev} disabled={tabIdx === 0}>
-                  ← Previous
-                </button>
-                {tabIdx === allTabs.length - 1 ? (
-                  <button className="button" onClick={submitAll} disabled={!allDone}>
-                    View results →
-                  </button>
+              <div style={S.nav}>
+                <button style={{ ...S.btnSec, opacity: tabIdx === 0 ? 0.4 : 1, cursor: tabIdx === 0 ? 'not-allowed' : 'pointer' }} onClick={goPrev} disabled={tabIdx === 0}>← Previous</button>
+                {tabIdx === tabs.length - 1 ? (
+                  <button style={{ ...S.btn, opacity: allDone ? 1 : 0.4, cursor: allDone ? 'pointer' : 'not-allowed' }} onClick={submitAll} disabled={!allDone}>View results →</button>
                 ) : (
-                  <button className="button" onClick={goNext}>
-                    Next section →
-                  </button>
+                  <button style={S.btn} onClick={goNext}>Next →</button>
                 )}
               </div>
 
-              {!allDone && tabIdx === allTabs.length - 1 && (
-                <div className="alert warning" style={{ marginTop: 16 }}>
-                  Please complete your profile and answer all questions before viewing your results.
-                </div>
+              {!allDone && tabIdx === tabs.length - 1 && (
+                <div style={{ ...S.alert('warning'), marginTop: 16 }}>Please complete your profile and answer all questions before viewing your results.</div>
               )}
             </div>
-            <div className="footer-tagline">Your progress is auto-saved locally · 100% confidential</div>
           </div>
         </div>
       );
     }
+
+    /* ============================================================
+     *  Results view (same shell: header + tabs + card)
+     * ============================================================ */
+    function ResultsView({ companyName, contactName, email, answers, onRestart, onShowAnalytics, onLogout, user }) {
+      const overall = calcOverall(answers);
+      const m = maturity(overall);
+      const catScores = sections.map(s => ({ id: s.id, label: s.label, icon: s.icon, score: calcCategory(s.id, answers) }));
+      const recs = recommendationsFor(catScores);
+
+      const [activeTab, setActiveTab] = useState('summary');
+      const tabs = [
+        { id: 'summary',         label: 'Summary',         icon: '📋' },
+        { id: 'dimensions',      label: 'Dimensions',      icon: '📊' },
+        { id: 'recommendations', label: 'Recommendations', icon: '💡' }
+      ];
+
+      useEffect(() => {
+        storage.saveResponse({
+          companyName, contactName, email,
+          overallScore: overall,
+          maturityLevel: m.level,
+          categoryScores: catScores.map(c => ({ id: c.id, name: c.label, score: c.score })),
+          answers
+        });
+        // eslint-disable-next-line
+      }, []);
+
+      const downloadHtml = () => {
+        const html =
+          '<!DOCTYPE html><html><head><meta charset="utf-8"><title>AI Readiness Report — ' + companyName + '</title>' +
+          '<style>body{font-family:-apple-system,sans-serif;max-width:800px;margin:40px auto;padding:20px;color:#1B3A5C}' +
+          'h1{color:#1B3A5C}h2{color:#2E86C1;margin-top:30px;border-bottom:2px solid #E8EDF2;padding-bottom:8px}' +
+          '.score{font-size:56px;font-weight:800;color:#1B3A5C}.row{padding:10px 14px;background:#F7F9FC;border-radius:8px;margin:8px 0}' +
+          '.rec{padding:14px 18px;border-left:4px solid #2E86C1;background:#EBF5FB;border-radius:8px;margin:10px 0}' +
+          '</style></head><body>' +
+          '<h1>Adesso AI Readiness Report</h1>' +
+          '<p><strong>Company:</strong> ' + companyName + (contactName ? ' &middot; <strong>Prepared for:</strong> ' + contactName : '') + '</p>' +
+          '<p><strong>Date:</strong> ' + new Date().toLocaleDateString() + '</p>' +
+          '<h2>Overall score</h2><div class="score">' + overall + '/100</div>' +
+          '<p><strong>Maturity level:</strong> ' + m.level + ' (' + m.percentile + ')</p>' +
+          '<p>' + m.detail + '</p>' +
+          '<h2>Category scores</h2>' +
+          catScores.map(c => '<div class="row"><strong>' + c.label + ':</strong> ' + c.score + '/100</div>').join('') +
+          '<h2>Recommendations</h2>' +
+          recs.map(r => '<div class="rec"><strong>' + r.title + '</strong><br/>' + r.desc + '</div>').join('') +
+          '</body></html>';
+        const blob = new Blob([html], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'AI_Readiness_Report_' + companyName.replace(/\s+/g, '_') + '.html'; a.click();
+      };
+
+      return (
+        <div style={S.page}>
+          <div style={S.shell}>
+            <HeaderCard user={user} onLogout={onLogout} onShowAnalytics={onShowAnalytics} />
+
+            <div style={S.card}>
+              <div style={S.sectionTitle}>
+                Results for {companyName}
+                <span style={S.badge}>Complete ✓</span>
+              </div>
+
+              <TabsRow tabs={tabs} activeId={activeTab} onSelect={setActiveTab} />
+
+              {activeTab === 'summary' && (
+                <>
+                  <div style={{ background: 'linear-gradient(135deg, #1B3A5C, #2E86C1)', color: '#fff', padding: 32, borderRadius: 16, textAlign: 'center', marginBottom: 20 }}>
+                    <div style={{ fontSize: 13, opacity: 0.9, textTransform: 'uppercase', letterSpacing: 1 }}>Overall AI Readiness Score</div>
+                    <div style={{ fontSize: 64, fontWeight: 800, lineHeight: 1, margin: '12px 0' }}>{overall}</div>
+                    <div style={{ fontSize: 16, opacity: 0.9 }}>{m.level} · {m.desc}</div>
+                    <div style={{ fontSize: 12, opacity: 0.8, marginTop: 8 }}>{m.percentile}</div>
+                  </div>
+                  <div style={S.alert('info')}><strong>What this means.</strong> {m.detail}</div>
+
+                  <div style={S.sectionTitle}>Heat map<span /></div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12 }}>
+                    {catScores.map(c => (
+                      <div key={c.id} style={{ textAlign: 'center' }}>
+                        <div style={{ aspectRatio: '1/1', borderRadius: 12, background: heatColor(c.score), color: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 10 }}>
+                          <div style={{ fontSize: 22 }}>{c.icon}</div>
+                          <div style={{ fontSize: 26, fontWeight: 800, lineHeight: 1, marginTop: 4 }}>{c.score}</div>
+                          <div style={{ fontSize: 11, opacity: 0.95, marginTop: 2 }}>{heatLabelOf(c.score)}</div>
+                        </div>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: '#1B3A5C', marginTop: 6 }}>{c.label}</div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {activeTab === 'dimensions' && (
+                <div style={S.grid3}>
+                  {catScores.map(c => (
+                    <div key={c.id} style={S.infoCard}>
+                      <div style={S.infoLabel}>{c.icon} {c.label}</div>
+                      <div style={S.infoValue}>{c.score} <span style={{ fontSize: 13, color: '#7F8C8D', fontWeight: 500 }}>/ 100</span></div>
+                      <div style={{ ...S.progressTrack, marginTop: 10, marginBottom: 0 }}>
+                        <div style={S.progressFill(c.score)} />
+                      </div>
+                      <div style={{ fontSize: 12, color: '#5D6D7E', marginTop: 8 }}>
+                        {c.score >= 70 ? '✓ Strong' : c.score >= 50 ? '○ Developing' : '⚠ Needs focus'}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {activeTab === 'recommendations' && (
+                <div>
+                  {recs.map((r, i) => (
+                    <div key={i} style={S.alert(r.type === 'critical' ? 'danger' : r.type === 'warning' ? 'warning' : 'success')}>
+                      <strong style={{ display: 'block', marginBottom: 4 }}>{r.title}{r.catLabel ? ' — ' + r.catLabel : ''}</strong>
+                      {r.desc}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div style={{ ...S.alert('success'), marginTop: 24 }}>
+                <strong>Ready to accelerate your AI journey?</strong><br/>
+                Adesso's experts can help you turn these insights into action — strategy workshops, data assessments, PoC development, and AI training.
+              </div>
+
+              <div style={S.nav}>
+                <button style={S.btnSec} onClick={onRestart}>← Take another assessment</button>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <button style={S.btnSec} onClick={onShowAnalytics}>📊 Analytics</button>
+                  <button style={S.btn} onClick={downloadHtml}>⬇ Download report</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ============================================================
+     *  Analytics view (same shell, tabbed)
+     * ============================================================ */
+    function AnalyticsView({ responses, onClose, user, onLogout }) {
+      const empty = responses.length === 0;
+      const avg = empty ? 0 : Math.round(responses.reduce((s, r) => s + r.overallScore, 0) / responses.length);
+      const high = empty ? 0 : Math.max(...responses.map(r => r.overallScore));
+      const companies = empty ? 0 : new Set(responses.map(r => r.companyName)).size;
+      const catAvg = sections.map(s => ({
+        ...s,
+        avg: empty ? 0 : Math.round(responses.reduce((sum, r) => {
+          const cs = r.categoryScores.find(c => c.id === s.id);
+          return sum + (cs ? cs.score : 0);
+        }, 0) / responses.length)
+      }));
+      const dist = empty ? {} : responses.reduce((acc, r) => {
+        const lvl = maturity(r.overallScore).level;
+        acc[lvl] = (acc[lvl] || 0) + 1; return acc;
+      }, {});
+
+      const [activeTab, setActiveTab] = useState('overview');
+      const tabs = [
+        { id: 'overview',     label: 'Overview',     icon: '📊' },
+        { id: 'distribution', label: 'Distribution', icon: '📈' },
+        { id: 'recent',       label: 'Recent',       icon: '🕐' }
+      ];
+
+      return (
+        <div style={S.page}>
+          <div style={S.shell}>
+            <HeaderCard user={user} onLogout={onLogout} />
+
+            <div style={S.card}>
+              <div style={S.sectionTitle}>
+                Analytics
+                <span style={S.badge}>{responses.length} assessments</span>
+              </div>
+
+              <TabsRow tabs={tabs} activeId={activeTab} onSelect={setActiveTab} />
+
+              {empty ? (
+                <div style={S.alert('info')}>No assessments yet. Complete one first to see analytics.</div>
+              ) : activeTab === 'overview' ? (
+                <>
+                  <div style={S.grid3}>
+                    <div style={S.infoCard}><div style={S.infoLabel}>Total</div><div style={S.infoValue}>{responses.length}</div></div>
+                    <div style={S.infoCard}><div style={S.infoLabel}>Average score</div><div style={S.infoValue}>{avg}</div></div>
+                    <div style={S.infoCard}><div style={S.infoLabel}>Highest score</div><div style={S.infoValue}>{high}</div></div>
+                    <div style={S.infoCard}><div style={S.infoLabel}>Companies</div><div style={S.infoValue}>{companies}</div></div>
+                  </div>
+
+                  <div style={{ ...S.sectionTitle, marginTop: 24 }}>Average per dimension<span /></div>
+                  {catAvg.map(c => (
+                    <div key={c.id} style={{ marginBottom: 12 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 14, color: '#1B3A5C' }}>
+                        <span style={{ fontWeight: 600 }}>{c.icon} {c.label}</span>
+                        <span style={{ color: '#5D6D7E' }}>{c.avg}</span>
+                      </div>
+                      <div style={S.progressTrack}><div style={S.progressFill(c.avg)} /></div>
+                    </div>
+                  ))}
+                </>
+              ) : activeTab === 'distribution' ? (
+                <>
+                  {Object.entries(dist).map(([lvl, count]) => {
+                    const pct = Math.round((count / responses.length) * 100);
+                    return (
+                      <div key={lvl} style={{ marginBottom: 12 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 14, color: '#1B3A5C' }}>
+                          <span style={{ fontWeight: 600 }}>{lvl}</span>
+                          <span style={{ color: '#5D6D7E' }}>{count} ({pct}%)</span>
+                        </div>
+                        <div style={S.progressTrack}><div style={S.progressFill(pct)} /></div>
+                      </div>
+                    );
+                  })}
+                </>
+              ) : (
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+                    <thead>
+                      <tr style={{ background: '#F7F9FC' }}>
+                        <th style={{ textAlign: 'left', padding: 10, color: '#5D6D7E', fontWeight: 600 }}>Date</th>
+                        <th style={{ textAlign: 'left', padding: 10, color: '#5D6D7E', fontWeight: 600 }}>Company</th>
+                        <th style={{ textAlign: 'left', padding: 10, color: '#5D6D7E', fontWeight: 600 }}>Email</th>
+                        <th style={{ textAlign: 'left', padding: 10, color: '#5D6D7E', fontWeight: 600 }}>Score</th>
+                        <th style={{ textAlign: 'left', padding: 10, color: '#5D6D7E', fontWeight: 600 }}>Maturity</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[...responses].slice(-10).reverse().map(r => {
+                        const mm = maturity(r.overallScore);
+                        return (
+                          <tr key={r.id} style={{ borderBottom: '1px solid #F0F2F5' }}>
+                            <td style={{ padding: 10 }}>{new Date(r.date).toLocaleDateString()}</td>
+                            <td style={{ padding: 10, fontWeight: 600 }}>{r.companyName}</td>
+                            <td style={{ padding: 10, color: '#5D6D7E' }}>{r.email}</td>
+                            <td style={{ padding: 10 }}>
+                              <span style={{ background: 'linear-gradient(135deg,#1B3A5C,#2E86C1)', color: '#fff', padding: '4px 10px', borderRadius: 12, fontSize: 12, fontWeight: 700 }}>{r.overallScore}</span>
+                            </td>
+                            <td style={{ padding: 10 }}>{mm.level}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              <div style={S.nav}>
+                <button style={S.btnSec} onClick={onClose}>← Back to assessment</button>
+                {!empty && <button style={S.btn} onClick={() => storage.exportToCSV(responses)}>⬇ Export CSV</button>}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ============================================================
+     *  Main App
+     * ============================================================ */
+    function App() {
+      const [user, setUser] = useState(null);
+      const [ready, setReady] = useState(false);
+      const [step, setStep] = useState('assessment');
+      const [companyName, setCompanyName] = useState('');
+      const [contactName, setContactName] = useState('');
+      const [email, setEmail] = useState('');
+      const [answers, setAnswers] = useState({});
+      const [responses, setResponses] = useState([]);
+      const [showAnalytics, setShowAnalytics] = useState(false);
+
+      useEffect(() => {
+        try {
+          const raw = sessionStorage.getItem(AUTH_KEY);
+          if (raw) {
+            const s = JSON.parse(raw);
+            const known = ALLOWED_USERS.find(u => u.email.toLowerCase() === (s.email || '').toLowerCase());
+            if (known) setUser(known);
+          }
         } catch {}
         setResponses(storage.getAllResponses());
         setReady(true);
@@ -987,26 +809,23 @@
       const handleLogin = (u) => setUser(u);
       const handleLogout = () => {
         try { sessionStorage.removeItem(AUTH_KEY); } catch {}
-        setUser(null); setStep('landing'); setShowAnalytics(false);
+        setUser(null); setStep('assessment'); setShowAnalytics(false);
       };
-      const handleStart = ({ companyName, email, contactName }) => {
-        setCompanyName(companyName); setEmail(email); setContactName(contactName);
-        setStep('assessment');
-      };
-      const handleComplete = (a) => {
-        setAnswers(a); setStep('results'); setResponses(storage.getAllResponses());
+      const handleComplete = ({ companyName: cn, email: em, contactName: ct, answers: ans }) => {
+        setCompanyName(cn); setEmail(em); setContactName(ct); setAnswers(ans);
+        setStep('results'); setResponses(storage.getAllResponses());
       };
       const handleRestart = () => {
-        setStep('landing'); setCompanyName(''); setEmail(''); setContactName(''); setAnswers({});
+        try { localStorage.removeItem(STORAGE_KEYS.PROGRESS); } catch {}
+        setStep('assessment'); setCompanyName(''); setEmail(''); setContactName(''); setAnswers({});
       };
       const handleShowAnalytics = () => { setResponses(storage.getAllResponses()); setShowAnalytics(true); };
 
       if (!ready) return null;
       if (!user) return <LoginScreen onLogin={handleLogin} />;
-      if (showAnalytics) return <Analytics responses={responses} user={user} onLogout={handleLogout} onClose={() => setShowAnalytics(false)} />;
-      if (step === 'landing')   return <LandingPage user={user} onStart={handleStart} onShowAnalytics={handleShowAnalytics} onLogout={handleLogout} />;
-      if (step === 'assessment') return <AssessmentForm user={user} companyName={companyName} contactName={contactName} email={email} onComplete={handleComplete} onLogout={handleLogout} />;
-      return <ResultsPage user={user} companyName={companyName} contactName={contactName} email={email} answers={answers} onRestart={handleRestart} onShowAnalytics={handleShowAnalytics} onLogout={handleLogout} />;
+      if (showAnalytics) return <AnalyticsView responses={responses} user={user} onLogout={handleLogout} onClose={() => setShowAnalytics(false)} />;
+      if (step === 'assessment') return <AssessmentView user={user} onComplete={handleComplete} onLogout={handleLogout} onShowAnalytics={handleShowAnalytics} />;
+      return <ResultsView user={user} companyName={companyName} contactName={contactName} email={email} answers={answers} onRestart={handleRestart} onShowAnalytics={handleShowAnalytics} onLogout={handleLogout} />;
     }
 
     function bootstrap() {
