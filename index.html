@@ -1,176 +1,75 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/adesso-ai-readiness-check/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI Readiness Check - adesso</title>
-    <meta name="description" content="AI Readiness Check — internal Adesso tool" />
-
-    <meta http-equiv="Content-Security-Policy" content="
-      default-src 'self';
-      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net;
-      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-      font-src 'self' https://fonts.gstatic.com;
-      img-src 'self' data: blob: https:;
-      connect-src 'self'
-        https://*.supabase.co
-        https://*.supabase.in
-        wss://*.supabase.co
-        wss://*.supabase.in
-        https://fcpceywaszttgwdwirao.supabase.co
-        https://fcpceywaszttgwdwirao.functions.supabase.co;
-      frame-src 'none';
-      object-src 'none';
-      base-uri 'self';
-      form-action 'self';
-      upgrade-insecure-requests;
-    ">
-
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" />
-    <link rel="stylesheet" crossorigin href="/adesso-ai-readiness-check/assets/index-DKAjiJzW.css" />
-
-    <style>
-      html, body { margin: 0; padding: 0; min-height: 100%; background: #F7F9FC; font-family: 'Outfit', 'DM Sans', system-ui, -apple-system, sans-serif; }
-      #gate {
-        position: fixed; inset: 0; z-index: 999999;
-        display: none; align-items: center; justify-content: center;
-        background: linear-gradient(135deg, #F5F7FA 0%, #E8EDF2 100%);
-      }
-      #gate.show { display: flex; }
-      body.gated #root { visibility: hidden; }
-      #gate .card {
-        background: #fff;
-        border-radius: 24px;
-        box-shadow: 0 20px 60px rgba(27,58,92,0.15);
-        padding: 48px;
-        max-width: 480px;
-        width: calc(100% - 40px);
-      }
-      #gate .brand {
-        display: inline-block;
-        background: linear-gradient(135deg, #1B3A5C, #2E86C1);
-        color: #fff;
-        padding: 14 22px;
-        border-radius: 16px;
-        font-size: 22px;
-        font-weight: 800;
-      }
-     gate h1 { margin: 16px 0 6px; font-size: 18px; color: #1B3A5; }
-      #gate p.lead { color: #5D6D7E; font-size: 14px; margin: 00 20px; }
-      #gate label { display: block; font-size: 14px; font-weight: 500; color:1B3A5C; margin-bottom: 6px; }
-      #gate input {
-        width: 100%; padding: 12 14px;
-        border: 2px solid #E8EDF2; border-radius: 10px;
-        font-size: 14; font-family: inherit; color: #1B3A5C;
-        outline: none; margin-bottom: 14px; box-sizing border-box;
-      }
-      #gate input:focus { border-color: #2E86C1; box-shadow: 0 0  3px rgba(46,134,193,0.15); }
-      #gate button {
-        width: 100%; padding: px 18px; border: 0;
-        background: linear-gradient(135deg, #1B3A5C, #2E861);
-        color: #fff; border-radius: 10px; font-size: 14px; font-weight: 700;
-        cursor pointer; font-family: inherit;
-      }
-      #gate .err {
-        margin-top: 12px; padding: 10px 12;
-        background: #FDEDEC; border-left: 4px solid #E74C3C; color: #922B21;
- border-radius: 8px; font-size: 13px; display: none;
-      }
-      #gate .err.show { display: block; }
-      #gate .note { margin-top: 18px; texttext-align: center; color: #7F8C8D; font-size: 12px; }
-      #signout-fab {
-        position: fixed; top: 12px; right: 12px; z-index: 9999;
-        background: #fff; color: #1B3A5C; border: 2px solid #E8EDF2;
-        padding: 6px 12px; border-radius: 999px; font-size: 12px;
-        font-family: 'Outfit', sans-serif; cursor: pointer;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.06); display: none;
-      }
-      #signout-fab.show { display: inline-block; }
-    </style>
-  </head>
-  <body class="gated">
-    <div id="gate" class="show">
-      <div class="card">
-        <div style="text-align:center; margin-bottom:24px;">
-          <div class="brand">Adesso AI Readiness Check</div>
-        </div>
-        <h1>Sign in</h1>
-        <p class="lead">Authorized Adesso users only.</p>
-        <form id="gate-form" autocomplete="on">
-          <label for="ge">Email</label>
-          <input id="ge" name="email" type="email" autocomplete="username" placeholder="firstname@adesso-group.com" required autofocus />
-          <label for="gp">Password</label>
-          <input id="gp" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required />
-          <button type="submit">Sign in</button>
-          <div id="gate-err" class="err">Invalid email or password.</div>
-          <div class="note">🔒 Internal tool · keep credentials confidential</div>
-        </form>
-      </div>
-    </div>
-
-    <button id="signout-fab" type="button" title="Sign out of the gate">⏏ Sign out</button>
-    <div id="root"></div>
-
-    <script>
-      (function () {
-        var AUTH_KEY = 'adesso_ai_readiness_gate';
-        var USERS = [{ email: 'roman.borvitz@adesso-group.com', password: 'R0man@Adesso2026!' }];
-
-        var gate = document.getElementById('gate');
-        var form = document.getElementById('gate-form');
-        var errBox = document.getElementById('gate-err');
-        var signout = document.getElementById('signout-fab');
-
-        function mountApp() {
-          if (window.__adessoMounted) return;
-          window.__adessoMounted = true;
-          var appTag = document.createElement('script');
-          appTag.type = 'module';
-          appTag.crossOrigin = '';
-          appTag.src = '/adesso-ai-readiness-check/assets/index-BhPe9XTt.js';
-          document.body.appendChild(appTag);
-        }
-
-        function authed() {
-          try {
-            var raw = sessionStorage.getItem(AUTH_KEY);
-            if (!raw) return false;
-            var s = JSON.parse(raw);
-            return !!USERS.find(function (u) { return u.email.toLowerCase() === (s.email || '').toLowerCase(); });
-          } catch (_) { return false; }
-        }
-
-        function showApp() {
-          gate.classList.remove('show');
-          document.body.classList.remove('gated');
-          signout.classList.add('show');
-          mountApp();
-        }
-
-        if (authed()) {
-          showApp();
-        } else {
-          form.addEventListener('submit', function (e) {
-            e.preventDefault();
-            var em = document.getElementById('ge').value.trim().toLowerCase();
-            var pw = document.getElementById('gp').value;
-            var m = USERS.find(function (u) { return u.email.toLowerCase() === em && u.password === pw; });
-            if (m) {
-              try { sessionStorage.setItem(AUTH_KEY, JSON.stringify({ email: m.email, ts: Date.now() })); } catch (_) {}
-              errBox.classList.remove('show');
-              showApp();
-            } else {
-              errBox.classList.add('show');
-            }
-          });
-        }
-
-        signout.addEventListener('click', function () {
-          try { sessionStorage.removeItem(AUTH_KEY); } catch (_) {}
-          window.location.reload();
-        });
-      })();
-    </script>
-  </body>
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Adesso AI Readiness Check</title>
+  <style>
+    *{box-sizing:border-box} body{margin:0;font-family:Outfit,Inter,system-ui,-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f8fc;color:#17365d}
+    .gate{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f5f8fc,#e8f1fb)}
+    .hidden{display:none!important}.card{background:#fff;border:1px solid #dfe8f2;border-radius:18px;box-shadow:0 24px 70px #17365d1f;padding:34px;width:min(430px,92vw)}
+    .brand{display:inline-flex;background:linear-gradient(135deg,#17365d,#2f86c1);color:white;border-radius:999px;padding:10px 22px;font-weight:800;letter-spacing:1.5px;font-size:13px}
+    label{display:block;font-size:13px;font-weight:700;margin:14px 0 6px} input,select,textarea{width:100%;border:2px solid #dfe8f2;border-radius:10px;padding:12px 14px;font:inherit;outline:none;background:#fff} textarea{min-height:90px;resize:vertical}
+    button{font:inherit;cursor:pointer;border:0;border-radius:10px;font-weight:800}.primary{background:linear-gradient(135deg,#17365d,#2f86c1);color:#fff;padding:12px 18px}.secondary{background:#fff;border:1px solid #dfe8f2;color:#657386;padding:11px 16px}.err{display:none;color:#d83b2d;background:#fdecea;border-radius:8px;padding:10px;margin-top:12px;font-size:13px}.err.show{display:block}
+    header{height:72px;background:#fff;border-bottom:1px solid #e4ebf3;display:flex;justify-content:space-between;align-items:center;padding:0 32px}.header-actions{display:flex;gap:14px;align-items:center}.logo{font-weight:900;color:#fff;background:linear-gradient(135deg,#17365d,#2f86c1);padding:9px 17px;border-radius:999px;font-size:12px;letter-spacing:1px}
+    main{max-width:1540px;margin:0 auto;padding:38px 32px}.stats{display:grid;grid-template-columns:repeat(5,210px);gap:16px;margin:28px 0}.tile{height:110px;border-radius:13px;background:#fff;border:1px solid #dfe8f2;padding:20px;box-shadow:0 1px 4px #17365d10}.tile .num{font-size:34px;font-weight:900;line-height:1}.purple{background:linear-gradient(135deg,#8c3fb1,#a958c8);color:#fff}.orange{background:linear-gradient(135deg,#fb7e11,#f79815);color:#fff}
+    .tabs,.toolbar{display:flex;gap:px;align-items:center}.tab{height:40px;padding:0 18px;border:1px solid #dfe8f2;background:#fff;color:#7b8794}.tab.active{background:#17365d;color:#fff}.row{display:flex;justify-content:space-between;gap:14px;max-width:1120px;margin:26px 0;flex-wrap:wrap}
+    .filters{max-width:1120px;background:#fff;border:1px solid #dfe8f2;border-radius:13px;padding:16px;display:grid;grid-template-columns:1fr 230px 150px;gap:12px}.list{max-width:1120px;margin-top:22px;display:grid;gap:14px}.assessment{background:#fff;border:1px solid #dfe8f2;border-radius:14px;padding:18px;display:flex;gap:16px;align-items:center;justify-content:space-between}.badge{padding:5px 10px;border-radius:999px;font-size:12px;font-weight:800;background:#eaf6ef;color:#238453}
+    .modal{position:fixed;inset:0;background:#0007;display:flex;align-items:center;justify-content:center;z-index:20}.modal .card{width:min(760px,94vw);max-height:90vh;overflow:auto}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.question{border:1px solid #dfe8f2;background:#f8fbff;border-radius:12px;padding:14px}.hint{font-size:12;color:#6f7b89;margin-top:5px}.progress{height:10px;background:#e4ebf3;border-radius:999;overflow:hidden}.bar{height:100%;background:linear-gradient(90deg,#17365d,#2f86c1)}
+    @media(max-width:1000px){.stats{grid-template-columns:repeat(2,1fr)}.filters{grid-template-columns:1fr}.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div id="gate" class="gate">
+    <form id="gateForm" class="card">
+      <div style="text-align:center;margin-bottom:24px"><span class="brand">Adesso AI Readiness Check</span></div>
+      <h1>Sign in</h1><p style="color:#6f7b89">Authorized Adesso users only.</p>
+      <label>Email</label><input id="email" type="email" autocomplete="username" placeholder="firstname@adesso-group.com" required />
+      <label>Password</label><input id="password" type="password" autocomplete="current-password" required />
+      <button class="primary" style="width:100%;margin-top:18px" type="submit">Sign in</button>
+      <div id="error" class="err">Invalid email or password.</div>
+      <p style="font-size:12px;color:#8a96a3;text-align:center">Static frontend-only demo · no backend connections</p>
+    </form>
+  </div>
+  <div id="app" class="hidden">
+    <header><div class="logo">AI READINESS CHECK</div><div class="header-actions"><button class="primary">🎯 Tour starten</button><button class="secondary">🇩🇪</button><span>🇬🇧</span><div style="text-align:right"><b>Roman Borvitz</b><br><small>Berater</small></div><button id="logout" class="secondary">Abmelden</button></div></header>
+    <main>
+      <h1>Willkommen, Roman! 👋</h1><p style="color:#6f7b89">Verwalten Sie Ihre AI Readiness Assessments und arbeiten Sie mit Ihrem Team zusammen.</p>
+      <section class="stats">
+        <div class="tile"><div class="num">2</div><p>Meine Assessments</p></div><div class="tile"><div class="num" style="color:#2f86c1">0</div><p>Zugewiesene Abschnitte</p></div><div class="tile"><div class="num" style="color:#2fac66">1</div><p>Abgeschlossen</p></div>
+        <button class="tile purple" onclick="showAnalytics()"><div style="font-size:30px">📊</div><b>Analytics</b><br><small>Alle Kunden vergleichen</small></button>
+        <button class="tile orange"><div style="font-size:30px">🤖</div><b>AI Katalog</b><br><small>SAP AI Use Cases</small></button>
+      </section>
+      <div class="row"><div class="tabs"><button class="tab active">Meine Assessments (2)</button><button class="tab">Mir zugewiesen (0)</button><button class="tab">Alle (2)</button></div><div class="toolbar"><button class="secondary">☑️ Auswählen</button><button class="primary" onclick="openAssessment()">+ Neues Assessment</button></div></div>
+      <section class="filters"><input id="search" placeholder="🔍 Suchen nach Kunde oder Branche..." oninput="renderList()"/><select id="industryFilter" onchange="renderList()"><option value="">Alle Branchen</option><option>Versicherungen / Rückversicherungen</option><option>Manufacturing Industry</option></select><select><option>Neueste zuerst</option></select></section>
+      <section id="list" class="list"></section>
+    </main>
+  </div>
+  <div id="assessmentModal" class="modal hidden"><div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><h2>AI Readiness Assessment</h2><button class="secondary" onclick="closeAssessment()">✕</button></div><div class="progress"><div id="progressBar" class="bar" style="width:0%"></div></div><p id="progressText"></p><div id="questions" class="grid"></div><div style="margin-top:18px;display:flex;justify-content:space-between"><button class="secondary" onclick="closeAssessment()">Schließen</button><button class="primary" onclick="saveAssessment()">Entwurf speichern</button></div></div></div>
+  <script>
+    const USERS=[{email:'roman.borvitz@adesso-group.com',password:'R0man@Adesso2026!'}];
+    const AUTH='adesso_static_gate';
+    const assessments=[{customer:'Allianz Deutschland AG',industry:'Versicherungen / Rückversicherungen',status:'In Bearbeitung',updated:'22.06.2026'},{customer:'Müller Maschinenbau GmbH',industry:'Manufacturing Industry',status:'Abgeschlossen',updated:'21.06.2026'}];
+    const questions=[
+      {section:'📋 Allgemeine Informationen',items:['Kundenname','Ansprechpartner','E-Mail','Berater (intern)']},
+      {section:'💻 SAP-Systemlandschaft',items:['Welche SAP-Systeme setzen Sie aktuell ein?','Welche SAP-Release-Version nutzen Sie?','On-Premise, Private Cloud oder Public Cloud (RISE/GROW)?','Verfolgen Sie eine Clean-Core-Strategie?']},
+      {section:'☁️ SAP BTP',items:['Nutzen Sie SAP BTP?','Welche BTP-Services sind im Einsatz?','BTP-Lizenzmodell?','Nutzen Sie SAP Datasphere?']},
+      {section:'🤖 KI im SAP-Umfeld',items:['Nutzen Sie bereits KI-Funktionen innerhalb von SAP?','Ist SAP Joule aktiviert oder geplant?','SAP Signavio mit KI-Funktionen?']},
+      {section:'📊 Datengrundlage',items:['Qualität Ihrer Stamm- und Bewegungsdaten?','Datenstrategie / Data Governance vorhanden?','Zentrales Data Warehouse / Data Lake?']},
+      {section:'🛡️ Versicherungen Beispiel',items:['Nutzen Sie SAP FS-CD oder SAP FI-CA?','Ist SAP S/4HANA FPSL im Einsatz?','Setzen Sie KI für Fraud Detection ein?','Gibt es KI-basierte Dunkelverarbeitung?']},
+      {section:'⚙️ Manufacturing Beispiel',items:['Nutzen Sie SAP Digital Manufacturing oder SAP ME?','Ist SAP PP/DS oder SAP IBP im Einsatz?','Setzen Sie Predictive Maintenance ein?','Gibt es KI-basierte Qualitätsprüfung?']}
+    ];
+    function loginOk(){try{return sessionStorage.getItem(AUTH)==='1'}catch{return false}}
+    function showApp(){gate.classList.add('hidden');app.classList.remove('hidden');renderList()}
+    gateForm.onsubmit=e=>{e.preventDefault();const em=email.value.trim().toLowerCase(),pw=password.value;const ok=USERS.some(u=>u.email.toLowerCase()===em&&u.password===pw);if(ok){sessionStorage.setItem(AUTH,'1');showApp()}else error.classList.add('show')};
+    logout.onclick=()=>{sessionStorage.removeItem(AUTH);location.reload()}; if(loginOk()) showApp();
+    function renderList(){const q=(search.value||'').toLowerCase(),ind=industryFilter.value;list.innerHTML=assessments.filter(a=>(!ind||a.industry===ind)&&(`${a.customer} ${a.industry}`.toLowerCase().includes(q))).map(a=>`<div class="assessment" onclick="openAssessment()"><div><b>${a.customer}</b><br><small>${a.industry} · Aktualisiert: ${a.updated}</small></div><span class="badge">${a.status}</span></div>`).join('')||'<p style="text-align:center;color:#7b8794">Keine Assessments gefunden</p>'}
+    function openAssessment(){questions.innerHTML=questionsData();progressText.textContent='0 Antworten erfasst · Beispiel-Fragen aus der Originalversion';assessmentModal.classList.remove('hidden')}
+    function closeAssessment(){assessmentModal.classList.add('hidden')}
+    function questionsData(){let i=0;return questions.map(s=>`<div class="question"><b>${s.section}</b>${s.items.map(q=>`<label>${q}</label><textarea oninput="updateProgress()" placeholder="Bitte eingeben..."></textarea>`).join('')}</div>`).join('')}
+    function updateProgress(){const fields=[...document.querySelectorAll('#questions textarea')];const filled=fields.filter(x=>x.value.trim()).length;progressBar.style.width=Math.round(filled/fields.length*100)+'%';progressText.textContent=`${filled}/${fields.length} Antworten erfasst`}
+    function saveAssessment(){alert('Entwurf lokal gespeichert. Diese Version hat bewusst keine Backend-Verbindung.')}
+    function showAnalytics(){alert('Analytics-Demo: 2 Assessments, Durchschnittlicher Readiness-Score: 58%. Keine Backend-Verbindung.')}
+  </script>
+</body>
 </html>
