@@ -408,22 +408,82 @@
     }
 
     /* ============================================================
-     *  Landing
+     *  Unified Dashboard + Assessment view
+     *  Single shell: header + progress + tabs (Profile + 6 sections)
      * ============================================================ */
-    function LandingPage({ user, onStart, onShowAnalytics, onLogout }) {
+    function AssessmentForm({ user, onComplete, onLogout, onShowAnalytics }) {
+      // Tabs: profile + the 6 assessment sections
+      const allTabs = [{ id: 'profile', label: 'Profile', short: 'Company profile', description: 'Tell us about your organization to personalize the assessment.' }, ...sections];
+
+      const [activeTab, setActiveTab] = useState('profile');
       const [companyName, setCompanyName] = useState('');
-      const [email, setEmail] = useState('');
       const [contactName, setContactName] = useState(user?.name || '');
+      const [email, setEmail] = useState('');
+      const [answers, setAnswers] = useState({});
+      const [showHelp, setShowHelp] = useState({});
       const [errors, setErrors] = useState({});
 
-      const submit = () => {
-        const ne = {};
-        if (!companyName.trim()) ne.companyName = 'Company name is required';
-        if (!email.trim()) ne.email = 'Email is required';
-        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) ne.email = 'Please enter a valid email';
-        setErrors(ne);
-        if (Object.keys(ne).length === 0) onStart({ companyName, email, contactName });
+      // Restore in-progress draft on mount
+      useEffect(() => {
+        const p = storage.getProgress();
+        if (p) {
+          if (p.companyName) setCompanyName(p.companyName);
+          if (p.contactName) setContactName(p.contactName);
+          if (p.email) setEmail(p.email);
+          if (p.answers) setAnswers(p.answers);
+          if (p.activeTab) setActiveTab(p.activeTab);
+        }
+      }, []);
+
+      // Auto-save
+      useEffect(() => {
+        if (companyName || email || Object.keys(answers).length > 0) {
+          storage.saveProgress({ companyName, contactName, email, answers, activeTab });
+        }
+      }, [companyName, contactName, email, answers, activeTab]);
+
+      const profileValid = companyName.trim() && email.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      const totalQ = questions.length;
+      const answered = Object.keys(answers).length;
+      const percent = Math.round(((profileValid ? 1 : 0) * 5 + (answered / totalQ) * 95));
+
+      const sectionDone = (sid) => sid === 'profile'
+        ? profileValid
+        : questions.filter(q => q.category === sid).every(q => answers[q.id] !== undefined);
+      const allDone = profileValid && sections.every(s => sectionDone(s.id));
+
+      const setAnswer = (qid, value) => setAnswers(prev => ({ ...prev, [qid]: value }));
+
+      const goNext = () => {
+        const idx = allTabs.findIndex(t => t.id === activeTab);
+
+        // Validate profile before allowing to leave it
+        if (activeTab === 'profile') {
+          const ne = {};
+          if (!companyName.trim()) ne.companyName = 'Company name is required';
+          if (!email.trim()) ne.email = 'Email is required';
+          else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) ne.email = 'Please enter a valid email';
+          setErrors(ne);
+          if (Object.keys(ne).length > 0) return;
+        }
+
+        if (idx < allTabs.length - 1) setActiveTab(allTabs[idx + 1].id);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       };
+      const goPrev = () => {
+        const idx = allTabs.findIndex(t => t.id === activeTab);
+        if (idx > 0) setActiveTab(allTabs[idx - 1].id);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+      const submitAll = () => {
+        storage.clearProgress();
+        onComplete({ companyName, contactName, email, answers });
+      };
+
+      const tab = allTabs.find(t => t.id === activeTab);
+      const tabIdx = allTabs.findIndex(t => t.id === activeTab);
+      const isProfile = activeTab === 'profile';
+      const sectionQuestions = isProfile ? [] : questions.filter(q => q.category === activeTab);
 
       return (
         <div className="app">
@@ -431,131 +491,7 @@
             <Header user={user} onLogout={onLogout} onShowAnalytics={onShowAnalytics} />
             <div className="content">
               <div className="section-title">
-                Welcome
-                <span className="section-badge">~5 min</span>
-              </div>
-
-              <div className="alert info">
-                <div>
-                  <strong>About this assessment</strong><br/>
-                  15 strategic questions across 6 maturity dimensions. You'll get a personalized
-                  AI readiness score, identified strengths and gaps, and concrete recommendations
-                  from Adesso's AI experts.
-                </div>
-              </div>
-
-              <div className="grid-3" style={{ marginTop: 24, marginBottom: 24 }}>
-                <div className="info-card">
-                  <div className="info-card-label">Strategic questions</div>
-                  <div className="info-card-value">15</div>
-                </div>
-                <div className="info-card">
-                  <div className="info-card-label">Maturity dimensions</div>
-                  <div className="info-card-value">6</div>
-                </div>
-                <div className="info-card">
-                  <div className="info-card-label">Estimated time</div>
-                  <div className="info-card-value">~5 min</div>
-                </div>
-              </div>
-
-              <div className="section-title" style={{ marginTop: 32 }}>
-                Start your assessment
-              </div>
-
-              <div className="grid-2">
-                <div>
-                  <div className="q-block" style={{ borderBottom: 'none', padding: '8px 0' }}>
-                    <label className="q-label">Your name (optional)</label>
-                    <input className="input" placeholder="e.g., Roman Borvitz"
-                      value={contactName} onChange={e => setContactName(e.target.value)} />
-                  </div>
-                </div>
-                <div>
-                  <div className="q-block" style={{ borderBottom: 'none', padding: '8px 0' }}>
-                    <label className="q-label">Business email <span style={{ color: '#E74C3C' }}>*</span></label>
-                    <input className="input" type="email" placeholder="firstname.lastname@adesso-group.com"
-                      value={email} onChange={e => setEmail(e.target.value)} />
-                    {errors.email && <div className="alert danger" style={{ marginTop: 8, padding: '8px 12px' }}>{errors.email}</div>}
-                  </div>
-                </div>
-              </div>
-
-              <div className="q-block" style={{ borderBottom: 'none', padding: '8px 0' }}>
-                <label className="q-label">Company name <span style={{ color: '#E74C3C' }}>*</span></label>
-                <input className="input" placeholder="Your company"
-                  value={companyName} onChange={e => setCompanyName(e.target.value)} />
-                {errors.companyName && <div className="alert danger" style={{ marginTop: 8, padding: '8px 12px' }}>{errors.companyName}</div>}
-              </div>
-
-              <div className="nav">
-                <div></div>
-                <button className="button" onClick={submit}>Start assessment →</button>
-              </div>
-            </div>
-            <div className="footer-tagline">Powered by Adesso AI Expertise · 100% confidential</div>
-          </div>
-        </div>
-      );
-    }
-
-    /* ============================================================
-     *  Assessment Form (tabbed sections — like the SAP project)
-     * ============================================================ */
-    function AssessmentForm({ companyName, contactName, email, onComplete, onLogout, user }) {
-      const [activeSection, setActiveSection] = useState(sections[0].id);
-      const [answers, setAnswers] = useState({});
-      const [showHelp, setShowHelp] = useState({});
-
-      useEffect(() => {
-        const p = storage.getProgress();
-        if (p && p.companyName === companyName) {
-          setAnswers(p.answers || {});
-          if (p.activeSection) setActiveSection(p.activeSection);
-        }
-      }, [companyName]);
-
-      useEffect(() => {
-        if (Object.keys(answers).length > 0) {
-          storage.saveProgress({ companyName, answers, activeSection });
-        }
-      }, [answers, activeSection, companyName]);
-
-      const totalQ = questions.length;
-      const answered = Object.keys(answers).length;
-      const percent = Math.round((answered / totalQ) * 100);
-
-      const sectionDone = (sid) => questions.filter(q => q.category === sid).every(q => answers[q.id] !== undefined);
-      const allDone = sections.every(s => sectionDone(s.id));
-
-      const setAnswer = (qid, value) => setAnswers(prev => ({ ...prev, [qid]: value }));
-
-      const goNext = () => {
-        const idx = sections.findIndex(s => s.id === activeSection);
-        if (idx < sections.length - 1) setActiveSection(sections[idx + 1].id);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      };
-      const goPrev = () => {
-        const idx = sections.findIndex(s => s.id === activeSection);
-        if (idx > 0) setActiveSection(sections[idx - 1].id);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      };
-      const submitAll = () => {
-        storage.clearProgress();
-        onComplete(answers);
-      };
-
-      const section = sections.find(s => s.id === activeSection);
-      const sectionQuestions = questions.filter(q => q.category === activeSection);
-      const sectionIdx = sections.findIndex(s => s.id === activeSection);
-
-      return (
-        <div className="app">
-          <div className="container">
-            <Header user={user} onLogout={onLogout} />
-            <div className="content">
-              <div className="section-title">
-                Assessment for {companyName}
+                {companyName ? 'Assessment for ' + companyName : 'AI Readiness Assessment'}
                 <span className="section-badge">{answered}/{totalQ} answered</span>
               </div>
 
@@ -564,61 +500,105 @@
               </div>
 
               <div className="tabs">
-                {sections.map(s => (
+                {allTabs.map(t => (
                   <button
-                    key={s.id}
-                    className={'tab' + (s.id === activeSection ? ' active' : '') + (sectionDone(s.id) ? ' complete' : '')}
-                    onClick={() => setActiveSection(s.id)}
+                    key={t.id}
+                    className={'tab' + (t.id === activeTab ? ' active' : '') + (sectionDone(t.id) ? ' complete' : '')}
+                    onClick={() => setActiveTab(t.id)}
                   >
-                    {s.label}
+                    {t.label}
                   </button>
                 ))}
               </div>
 
               <div className="section-title">
-                {section.short}
-                <span className="section-badge">Step {sectionIdx + 1} of {sections.length}</span>
+                {tab.short}
+                <span className="section-badge">Step {tabIdx + 1} of {allTabs.length}</span>
               </div>
-              <div className="alert info">{section.description}</div>
+              <div className="alert info">{tab.description}</div>
 
-              {sectionQuestions.map(q => (
-                <div className="q-block" key={q.id}>
-                  <div className="q-label">
-                    {q.text}
-                    {q.helpText && (
-                      <span
-                        className="q-help"
-                        title={q.helpText}
-                        onClick={() => setShowHelp(prev => ({ ...prev, [q.id]: !prev[q.id] }))}
-                      >?</span>
-                    )}
-                  </div>
-                  {showHelp[q.id] && q.helpText && (
-                    <div className="alert info" style={{ padding: '10px 12px', fontSize: 13, marginBottom: 10 }}>
-                      {q.helpText}
+              {isProfile ? (
+                <>
+                  <div className="grid-3" style={{ marginBottom: 16 }}>
+                    <div className="info-card">
+                      <div className="info-card-label">Strategic questions</div>
+                      <div className="info-card-value">15</div>
                     </div>
-                  )}
-                  <div className="pill-group">
-                    {responseOptions.map(opt => (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        className={'pill' + (answers[q.id] === opt.value ? ' selected' : '')}
-                        onClick={() => setAnswer(q.id, opt.value)}
-                        title={opt.desc}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
+                    <div className="info-card">
+                      <div className="info-card-label">Maturity dimensions</div>
+                      <div className="info-card-value">6</div>
+                    </div>
+                    <div className="info-card">
+                      <div className="info-card-label">Estimated time</div>
+                      <div className="info-card-value">~5 min</div>
+                    </div>
                   </div>
-                </div>
-              ))}
+
+                  <div className="grid-2">
+                    <div>
+                      <div className="q-block" style={{ borderBottom: 'none', padding: '8px 0' }}>
+                        <label className="q-label">Your name (optional)</label>
+                        <input className="input" placeholder="e.g., Roman Borvitz"
+                          value={contactName} onChange={e => setContactName(e.target.value)} />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="q-block" style={{ borderBottom: 'none', padding: '8px 0' }}>
+                        <label className="q-label">Business email <span style={{ color: '#E74C3C' }}>*</span></label>
+                        <input className="input" type="email" placeholder="firstname.lastname@adesso-group.com"
+                          value={email} onChange={e => setEmail(e.target.value)} />
+                        {errors.email && <div className="alert danger" style={{ marginTop: 8, padding: '8px 12px' }}>{errors.email}</div>}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="q-block" style={{ borderBottom: 'none', padding: '8px 0' }}>
+                    <label className="q-label">Company name <span style={{ color: '#E74C3C' }}>*</span></label>
+                    <input className="input" placeholder="Your company"
+                      value={companyName} onChange={e => setCompanyName(e.target.value)} />
+                    {errors.companyName && <div className="alert danger" style={{ marginTop: 8, padding: '8px 12px' }}>{errors.companyName}</div>}
+                  </div>
+                </>
+              ) : (
+                sectionQuestions.map(q => (
+                  <div className="q-block" key={q.id}>
+                    <div className="q-label">
+                      {q.text}
+                      {q.helpText && (
+                        <span
+                          className="q-help"
+                          title={q.helpText}
+                          onClick={() => setShowHelp(prev => ({ ...prev, [q.id]: !prev[q.id] }))}
+                        >?</span>
+                      )}
+                    </div>
+                    {showHelp[q.id] && q.helpText && (
+                      <div className="alert info" style={{ padding: '10px 12px', fontSize: 13, marginBottom: 10 }}>
+                        {q.helpText}
+                      </div>
+                    )}
+                    <div className="pill-group">
+                      {responseOptions.map(opt => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          className={'pill' + (answers[q.id] === opt.value ? ' selected' : '')}
+                          onClick={() => setAnswer(q.id, opt.value)}
+                          title={opt.desc}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))
+              )}
 
               <div className="nav">
-                <button className="button button-secondary" onClick={goPrev} disabled={sectionIdx === 0}>
+                <button className="button button-secondary" onClick={goPrev} disabled={tabIdx === 0}>
                   ← Previous
                 </button>
-                {sectionIdx === sections.length - 1 ? (
+                {tabIdx === allTabs.length - 1 ? (
                   <button className="button" onClick={submitAll} disabled={!allDone}>
                     View results →
                   </button>
@@ -629,9 +609,9 @@
                 )}
               </div>
 
-              {!allDone && sectionIdx === sections.length - 1 && (
+              {!allDone && tabIdx === allTabs.length - 1 && (
                 <div className="alert warning" style={{ marginTop: 16 }}>
-                  Please answer all questions before viewing your results. {totalQ - answered} remaining.
+                  Please complete your profile and answer all questions before viewing your results.
                 </div>
               )}
             </div>
@@ -787,146 +767,215 @@
     }
 
     /* ============================================================
-     *  Analytics dashboard
+     *  Unified Dashboard + Assessment view
+     *  One shell: header + progress + tabs (Profile + 6 dimensions)
      * ============================================================ */
-    function Analytics({ responses, onClose, user, onLogout }) {
-      const empty = responses.length === 0;
-      const avg = empty ? 0 : Math.round(responses.reduce((s, r) => s + r.overallScore, 0) / responses.length);
-      const high = empty ? 0 : Math.max(...responses.map(r => r.overallScore));
-      const companies = empty ? 0 : new Set(responses.map(r => r.companyName)).size;
-      const catAvg = sections.map(s => ({
-        ...s,
-        avg: empty ? 0 : Math.round(responses.reduce((sum, r) => {
-          const cs = r.categoryScores.find(c => c.id === s.id);
-          return sum + (cs ? cs.score : 0);
-        }, 0) / responses.length)
-      }));
-      const dist = empty ? {} : responses.reduce((acc, r) => {
-        const lvl = maturity(r.overallScore).level;
-        acc[lvl] = (acc[lvl] || 0) + 1; return acc;
-      }, {});
+    function AssessmentForm({ user, onComplete, onLogout, onShowAnalytics }) {
+      const allTabs = [
+        { id: 'profile', label: 'Profile', short: 'Company profile', description: 'Tell us about your organization to personalize the assessment.' },
+        ...sections
+      ];
+
+      const [activeTab, setActiveTab] = useState('profile');
+      const [companyName, setCompanyName] = useState('');
+      const [contactName, setContactName] = useState(user?.name || '');
+      const [email, setEmail] = useState('');
+      const [answers, setAnswers] = useState({});
+      const [showHelp, setShowHelp] = useState({});
+      const [errors, setErrors] = useState({});
+
+      useEffect(() => {
+        const p = storage.getProgress();
+        if (p) {
+          if (p.companyName) setCompanyName(p.companyName);
+          if (p.contactName) setContactName(p.contactName);
+          if (p.email) setEmail(p.email);
+          if (p.answers) setAnswers(p.answers);
+          if (p.activeTab) setActiveTab(p.activeTab);
+        }
+      }, []);
+
+      useEffect(() => {
+        if (companyName || email || Object.keys(answers).length > 0) {
+          storage.saveProgress({ companyName, contactName, email, answers, activeTab });
+        }
+      }, [companyName, contactName, email, answers, activeTab]);
+
+      const profileValid = !!(companyName.trim() && email.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
+      const totalQ = questions.length;
+      const answered = Object.keys(answers).length;
+      const percent = Math.round(((profileValid ? 5 : 0) + (answered / totalQ) * 95));
+
+      const tabDone = (tid) => tid === 'profile'
+        ? profileValid
+        : questions.filter(q => q.category === tid).every(q => answers[q.id] !== undefined);
+      const allDone = profileValid && sections.every(s => tabDone(s.id));
+
+      const setAnswer = (qid, value) => setAnswers(prev => ({ ...prev, [qid]: value }));
+
+      const goNext = () => {
+        if (activeTab === 'profile') {
+          const ne = {};
+          if (!companyName.trim()) ne.companyName = 'Company name is required';
+          if (!email.trim()) ne.email = 'Email is required';
+          else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) ne.email = 'Please enter a valid email';
+          setErrors(ne);
+          if (Object.keys(ne).length > 0) return;
+        }
+        const idx = allTabs.findIndex(t => t.id === activeTab);
+        if (idx < allTabs.length - 1) setActiveTab(allTabs[idx + 1].id);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+      const goPrev = () => {
+        const idx = allTabs.findIndex(t => t.id === activeTab);
+        if (idx > 0) setActiveTab(allTabs[idx - 1].id);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+      const submitAll = () => {
+        storage.clearProgress();
+        onComplete({ companyName, contactName, email, answers });
+      };
+
+      const tab = allTabs.find(t => t.id === activeTab);
+      const tabIdx = allTabs.findIndex(t => t.id === activeTab);
+      const isProfile = activeTab === 'profile';
+      const sectionQuestions = isProfile ? [] : questions.filter(q => q.category === activeTab);
 
       return (
         <div className="app">
           <div className="container">
-            <Header user={user} onLogout={onLogout} />
+            <Header user={user} onLogout={onLogout} onShowAnalytics={onShowAnalytics} />
             <div className="content">
               <div className="section-title">
-                Analytics
-                <span className="section-badge">{responses.length} assessments</span>
+                {companyName ? 'Assessment for ' + companyName : 'AI Readiness Assessment'}
+                <span className="section-badge">{answered}/{totalQ} answered</span>
               </div>
 
-              {empty ? (
-                <div className="alert info">No assessments yet. Complete one first to see analytics.</div>
-              ) : (
+              <div className="progress-track">
+                <div className="progress-fill" style={{ width: percent + '%' }} />
+              </div>
+
+              <div className="tabs">
+                {allTabs.map(t => (
+                  <button
+                    key={t.id}
+                    className={'tab' + (t.id === activeTab ? ' active' : '') + (tabDone(t.id) ? ' complete' : '')}
+                    onClick={() => setActiveTab(t.id)}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="section-title">
+                {tab.short}
+                <span className="section-badge">Step {tabIdx + 1} of {allTabs.length}</span>
+              </div>
+              <div className="alert info">{tab.description}</div>
+
+              {isProfile ? (
                 <>
-                  <div className="grid-3">
-                    <div className="info-card"><div className="info-card-label">Total</div><div className="info-card-value">{responses.length}</div></div>
-                    <div className="info-card"><div className="info-card-label">Average score</div><div className="info-card-value">{avg}</div></div>
-                    <div className="info-card"><div className="info-card-label">Highest score</div><div className="info-card-value">{high}</div></div>
-                  </div>
-                  <div className="info-card" style={{ marginTop: 16 }}>
-                    <div className="info-card-label">Unique companies</div>
-                    <div className="info-card-value">{companies}</div>
+                  <div className="grid-3" style={{ marginBottom: 16 }}>
+                    <div className="info-card">
+                      <div className="info-card-label">Strategic questions</div>
+                      <div className="info-card-value">15</div>
+                    </div>
+                    <div className="info-card">
+                      <div className="info-card-label">Maturity dimensions</div>
+                      <div className="info-card-value">6</div>
+                    </div>
+                    <div className="info-card">
+                      <div className="info-card-label">Estimated time</div>
+                      <div className="info-card-value">~5 min</div>
+                    </div>
                   </div>
 
-                  <div className="section-title" style={{ marginTop: 32 }}>Maturity level distribution</div>
-                  {Object.entries(dist).map(([lvl, count]) => {
-                    const pct = Math.round((count / responses.length) * 100);
-                    return (
-                      <div key={lvl} style={{ marginBottom: 12 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 14, color: '#1B3A5C' }}>
-                          <span style={{ fontWeight: 600 }}>{lvl}</span>
-                          <span style={{ color: '#5D6D7E' }}>{count} ({pct}%)</span>
-                        </div>
-                        <div className="progress-track" style={{ marginBottom: 0 }}>
-                          <div className="progress-fill" style={{ width: pct + '%' }} />
-                        </div>
-                      </div>
-                    );
-                  })}
-
-                  <div className="section-title" style={{ marginTop: 32 }}>Average per dimension</div>
-                  {catAvg.map(c => (
-                    <div key={c.id} style={{ marginBottom: 12 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 14, color: '#1B3A5C' }}>
-                        <span style={{ fontWeight: 600 }}>{c.short}</span>
-                        <span style={{ color: '#5D6D7E' }}>{c.avg}</span>
-                      </div>
-                      <div className="progress-track" style={{ marginBottom: 0 }}>
-                        <div className="progress-fill" style={{ width: c.avg + '%' }} />
+                  <div className="grid-2">
+                    <div>
+                      <div className="q-block" style={{ borderBottom: 'none', padding: '8px 0' }}>
+                        <label className="q-label">Your name (optional)</label>
+                        <input className="input" placeholder="e.g., Roman Borvitz"
+                          value={contactName} onChange={e => setContactName(e.target.value)} />
                       </div>
                     </div>
-                  ))}
+                    <div>
+                      <div className="q-block" style={{ borderBottom: 'none', padding: '8px 0' }}>
+                        <label className="q-label">Business email <span style={{ color: '#E74C3C' }}>*</span></label>
+                        <input className="input" type="email" placeholder="firstname.lastname@adesso-group.com"
+                          value={email} onChange={e => setEmail(e.target.value)} />
+                        {errors.email && <div className="alert danger" style={{ marginTop: 8, padding: '8px 12px' }}>{errors.email}</div>}
+                      </div>
+                    </div>
+                  </div>
 
-                  <div className="section-title" style={{ marginTop: 32 }}>Recent assessments</div>
-                  <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-                      <thead>
-                        <tr style={{ background: '#F7F9FC' }}>
-                          <th style={{ textAlign: 'left', padding: 10, color: '#5D6D7E', fontWeight: 600 }}>Date</th>
-                          <th style={{ textAlign: 'left', padding: 10, color: '#5D6D7E', fontWeight: 600 }}>Company</th>
-                          <th style={{ textAlign: 'left', padding: 10, color: '#5D6D7E', fontWeight: 600 }}>Email</th>
-                          <th style={{ textAlign: 'left', padding: 10, color: '#5D6D7E', fontWeight: 600 }}>Score</th>
-                          <th style={{ textAlign: 'left', padding: 10, color: '#5D6D7E', fontWeight: 600 }}>Maturity</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {[...responses].slice(-10).reverse().map(r => {
-                          const mm = maturity(r.overallScore);
-                          return (
-                            <tr key={r.id} style={{ borderBottom: '1px solid #F0F2F5' }}>
-                              <td style={{ padding: 10 }}>{new Date(r.date).toLocaleDateString()}</td>
-                              <td style={{ padding: 10, fontWeight: 600 }}>{r.companyName}</td>
-                              <td style={{ padding: 10, color: '#5D6D7E' }}>{r.email}</td>
-                              <td style={{ padding: 10 }}>
-                                <span style={{ background: 'linear-gradient(135deg,#1B3A5C,#2E5C8A)', color: '#fff', padding: '4px 10px', borderRadius: 12, fontSize: 12, fontWeight: 700 }}>
-                                  {r.overallScore}
-                                </span>
-                              </td>
-                              <td style={{ padding: 10 }}>{mm.level}</td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                  <div className="q-block" style={{ borderBottom: 'none', padding: '8px 0' }}>
+                    <label className="q-label">Company name <span style={{ color: '#E74C3C' }}>*</span></label>
+                    <input className="input" placeholder="Your company"
+                      value={companyName} onChange={e => setCompanyName(e.target.value)} />
+                    {errors.companyName && <div className="alert danger" style={{ marginTop: 8, padding: '8px 12px' }}>{errors.companyName}</div>}
                   </div>
                 </>
+              ) : (
+                sectionQuestions.map(q => (
+                  <div className="q-block" key={q.id}>
+                    <div className="q-label">
+                      {q.text}
+                      {q.helpText && (
+                        <span
+                          className="q-help"
+                          title={q.helpText}
+                          onClick={() => setShowHelp(prev => ({ ...prev, [q.id]: !prev[q.id] }))}
+                        >?</span>
+                      )}
+                    </div>
+                    {showHelp[q.id] && q.helpText && (
+                      <div className="alert info" style={{ padding: '10px 12px', fontSize: 13, marginBottom: 10 }}>
+                        {q.helpText}
+                      </div>
+                    )}
+                    <div className="pill-group">
+                      {responseOptions.map(opt => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          className={'pill' + (answers[q.id] === opt.value ? ' selected' : '')}
+                          onClick={() => setAnswer(q.id, opt.value)}
+                          title={opt.desc}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))
               )}
 
               <div className="nav">
-                <button className="button button-secondary" onClick={onClose}>← Back</button>
-                {!empty && <button className="button" onClick={() => storage.exportToCSV(responses)}>⬇ Export CSV</button>}
+                <button className="button button-secondary" onClick={goPrev} disabled={tabIdx === 0}>
+                  ← Previous
+                </button>
+                {tabIdx === allTabs.length - 1 ? (
+                  <button className="button" onClick={submitAll} disabled={!allDone}>
+                    View results →
+                  </button>
+                ) : (
+                  <button className="button" onClick={goNext}>
+                    Next section →
+                  </button>
+                )}
               </div>
+
+              {!allDone && tabIdx === allTabs.length - 1 && (
+                <div className="alert warning" style={{ marginTop: 16 }}>
+                  Please complete your profile and answer all questions before viewing your results.
+                </div>
+              )}
             </div>
-            <div className="footer-tagline">Adesso AI Readiness Check — Analytics</div>
+            <div className="footer-tagline">Your progress is auto-saved locally · 100% confidential</div>
           </div>
         </div>
       );
     }
-
-    /* ============================================================
-     *  Main App
-     * ============================================================ */
-    function App() {
-      const [user, setUser] = useState(null);
-      const [ready, setReady] = useState(false);
-      const [step, setStep] = useState('landing');
-      const [companyName, setCompanyName] = useState('');
-      const [contactName, setContactName] = useState('');
-      const [email, setEmail] = useState('');
-      const [answers, setAnswers] = useState({});
-      const [responses, setResponses] = useState([]);
-      const [showAnalytics, setShowAnalytics] = useState(false);
-
-      useEffect(() => {
-        try {
-          const raw = sessionStorage.getItem(AUTH_KEY);
-          if (raw) {
-            const s = JSON.parse(raw);
-            const known = ALLOWED_USERS.find(u => u.email.toLowerCase() === (s.email || '').toLowerCase());
-            if (known) setUser(known);
-          }
         } catch {}
         setResponses(storage.getAllResponses());
         setReady(true);
